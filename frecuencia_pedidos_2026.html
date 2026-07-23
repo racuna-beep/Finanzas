@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frecuencia de Pedidos 2026</title>
+    <style>
+        :root {
+            --primary: #ff6b00;
+            --primary-hover: #e05d00;
+            --bg-light: #f8f9fa;
+            --text-dark: #2c3e50;
+            --border-color: #e2e8f0;
+            --obs-bg: #fff3e0;
+            --obs-border: #ffe0b2;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            padding: 20px;
+        }
+
+        header {
+            background-color: #ffffff;
+            border-bottom: 4px solid var(--primary);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 1.6rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        select, button, input {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        button.btn-secondary {
+            background-color: #6c757d;
+        }
+        button.btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        button.btn-danger {
+            background-color: #dc3545;
+        }
+        button.btn-danger:hover {
+            background-color: #bd2130;
+        }
+
+        .tabs-days {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+            background-color: #fff;
+            padding: 5px 5px 0 5px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            background: none;
+            font-weight: bold;
+            color: #6c757d;
+            border-bottom: 3px solid transparent;
+            border-radius: 0;
+            cursor: pointer;
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background-color: #fff5ed;
+        }
+
+        .kpi-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .kpi-card {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .kpi-title {
+            font-size: 0.85rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .kpi-value {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--text-dark);
+            margin-top: 5px;
+        }
+
+        .table-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background-color: #f1f5f9;
+            color: var(--text-dark);
+            padding: 12px;
+            font-weight: 600;
+            border-bottom: 2px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        tr.has-observation {
+            background-color: var(--obs-bg) !important;
+        }
+
+        tr:hover {
+            background-color: #f8fafc;
+        }
+
+        /* Styling Custom Checkbox */
+        .custom-checkbox {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .obs-input {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        tr.has-observation .obs-input {
+            border-color: #f59e0b;
+            background-color: #fff8f0;
+        }
+
+        .btn-whatsapp {
+            background-color: #25d366;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 600;
+        }
+
+        .btn-whatsapp:hover {
+            background-color: #1ebc57;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            width: 400px;
+            max-width: 90%;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .filter-active {
+            background-color: #e05d00 !important;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>📦 Frecuencia de Pedidos - 2026</h1>
+    <div class="controls">
+        <label for="weekSelect"><b>Semana:</b></label>
+        <select id="weekSelect" onchange="changeWeek()"></select>
+
+        <button onclick="openModal()">➕ Añadir Proveedor</button>
+        <button class="btn-secondary" onclick="exportData()">💾 Exportar Trabajo</button>
+        <button class="btn-secondary" onclick="document.getElementById('importFile').click()">📂 Importar Trabajo</button>
+        <input type="file" id="importFile" style="display:none" onchange="importData(event)" accept=".json">
+    </div>
+</header>
+
+<div class="tabs-days">
+    <button class="tab-btn active" onclick="setDay('LUNES')">Lunes</button>
+    <button class="tab-btn" onclick="setDay('MARTES')">Martes</button>
+    <button class="tab-btn" onclick="setDay('MIERCOLES')">Miércoles</button>
+    <button class="tab-btn" onclick="setDay('JUEVES')">Jueves</button>
+    <button class="tab-btn" onclick="setDay('VIERNES')">Viernes</button>
+</div>
+
+<div class="kpi-container">
+    <div class="kpi-card">
+        <div class="kpi-title">Avance Solicitudes (Día)</div>
+        <div class="kpi-value" id="kpiProgress">0 / 0 (0%)</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-title">Total Novedades / Observaciones</div>
+        <div class="kpi-value" id="kpiObs">0</div>
+    </div>
+    <div class="kpi-card" style="display: flex; align-items: center;">
+        <button id="btnFilterObs" onclick="toggleFilterObs()" style="width: 100%;">🔍 Ver solo con Observaciones</button>
+    </div>
+</div>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Proveedor</th>
+                <th>Brand</th>
+                <th>Tipo</th>
+                <th style="text-align: center;">STF 15</th>
+                <th style="text-align: center;">STF 51</th>
+                <th>Observaciones</th>
+                <th>WhatsApp</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <!-- Dynamic Content -->
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal Añadir Proveedor -->
+<div class="modal" id="addModal">
+    <div class="modal-content">
+        <h3>Agregar Nuevo Proveedor</h3>
+        <div class="form-group">
+            <label>Día de Compra</label>
+            <select id="newDay">
+                <option value="LUNES">LUNES</option>
+                <option value="MARTES">MARTES</option>
+                <option value="MIERCOLES">MIÉRCOLES</option>
+                <option value="JUEVES">JUEVES</option>
+                <option value="VIERNES">VIERNES</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Proveedor (Supplier)</label>
+            <input type="text" id="newSupplier" required>
+        </div>
+        <div class="form-group">
+            <label>Marca (Brand)</label>
+            <input type="text" id="newBrand">
+        </div>
+        <div class="form-group">
+            <label>Tipo</label>
+            <input type="text" id="newTipo" value="Pareto">
+        </div>
+        <div class="form-group">
+            <label>Código País (Ej: 57)</label>
+            <input type="text" id="newCode" value="57">
+        </div>
+        <div class="form-group">
+            <label>Número WhatsApp</label>
+            <input type="text" id="newPhone" placeholder="300 0000000">
+        </div>
+        <div class="modal-actions">
+            <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
+            <button onclick="saveNewSupplier()">Guardar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// BASE DE DATOS INICIAL CON EL 100% DE PROVEEDORES EXTRAÍDOS
+const initialMasterData = {
+    "LUNES": [
+        { id: "L1", supplier: "1 SOURCE SAS", brand: "Bayter", tipo: "Pareto", code: "57", phone: "301 3752364" },
+        { id: "L2", supplier: "4 ELEMENTOS S.A.S.", brand: "D'Italia", tipo: "Pareto", code: "57", phone: "314 8275627" },
+        { id: "L3", supplier: "ABC COCINA S.A.S.", brand: "Del Origen", tipo: "Pareto", code: "57", phone: "323 3892070" },
+        { id: "L4", supplier: "AFMA SAS", brand: "Damar Snacks", tipo: "Pareto", code: "57", phone: "321 4519520" },
+        { id: "L5", supplier: "ALEXANDRA SANCLEMENTE MEJIA", brand: "Nüsh Mindfoodness", tipo: "", code: "57", phone: "313 7164988" },
+        { id: "L6", supplier: "ALIMENTOS MAKARENA SAS", brand: "Mauka", tipo: "Pareto", code: "57", phone: "315 4099646" },
+        { id: "L7", supplier: "Alimentos Naturales Del Campo SAS", brand: "Alcampo", tipo: "", code: "57", phone: "317 3317204" },
+        { id: "L8", supplier: "Alimentos Nebraska SAS", brand: "fithub", tipo: "Pareto", code: "57", phone: "311 2549393" },
+        { id: "L9", supplier: "ALIMENTOS SALUDABLES VILLA SANTOS SAS", brand: "Villa Santos", tipo: "Pareto", code: "57", phone: "317 5016233" },
+        { id: "L10", supplier: "ALPINA PRODUCTOS ALIMENTICIOS S.A. BIC", brand: "Alpina", tipo: "Pareto", code: "57", phone: "318 7161938" },
+        { id: "L11", supplier: "AM SANTA SAS", brand: "Chacha", tipo: "Pareto", code: "57", phone: "323 7965870" },
+        { id: "L12", supplier: "AMANDE COCINA S.A.S.", brand: "Amande", tipo: "Pareto", code: "57", phone: "" },
+        { id: "L13", supplier: "Andrea Paola Barreto", brand: "Vitanas", tipo: "Pareto", code: "57", phone: "304 4534995" },
+        { id: "L14", supplier: "AREPFIT S.A.S.", brand: "ArepFit", tipo: "Pareto", code: "57", phone: "300 4887586" },
+        { id: "L15", supplier: "ATALÚ SAS", brand: "Atalú", tipo: "", code: "34", phone: "" },
+        { id: "L16", supplier: "BIODISTRIBUCIONES TERRA S.A.S.", brand: "fithub", tipo: "Pareto", code: "57", phone: "318 7168850" },
+        { id: "L17", supplier: "BODAI FOODS SAS", brand: "Bodai", tipo: "Pareto", code: "57", phone: "317 6563267" },
+        { id: "L18", supplier: "BULKFIT S.A.S", brand: "Metabolic", tipo: "Pareto", code: "57", phone: "" },
+        { id: "L19", supplier: "Carolina Chegwin", brand: "Café Isabelita", tipo: "", code: "57", phone: "" },
+        { id: "L20", supplier: "CAROLINE CORREA CARDONA", brand: "Kalan", tipo: "Pareto", code: "57", phone: "321 4685287" },
+        { id: "L21", supplier: "CESAR AUGUSTO MONROY DIAZ", brand: "Origen Natural", tipo: "Pareto", code: "57", phone: "316 4744722" },
+        { id: "L22", supplier: "Cinco Avellanas Sas", brand: "Cinco Avellanas", tipo: "Pareto", code: "57", phone: "300 6772486" },
+        { id: "L23", supplier: "LA GALATTI S.A.S.", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "L24", supplier: "COMERCIALIZADORA AGRANEL SAS", brand: "fithub", tipo: "Pareto", code: "57", phone: "304 2153222" },
+        { id: "L25", supplier: "COMERCIALIZADORA INTERNACIONAL COCOLMEX S.A.S", brand: "A de Coco", tipo: "Pareto", code: "57", phone: "317 5267560" },
+        { id: "L26", supplier: "PRODUCTOS VICKY S.A.S.", brand: "fithub", tipo: "", code: "57", phone: "304 2153222" },
+        { id: "L27", supplier: "COMPAÑIA DE ALIMENTOS ANTILLANA S.A.S.", brand: "Antillana", tipo: "Pareto", code: "57", phone: "313 5861019" },
+        { id: "L28", supplier: "CORREA COUSINS S.A.S", brand: "Mils", tipo: "Pareto", code: "57", phone: "312 3087768" },
+        { id: "L29", supplier: "CRISPY SNACKS S.A.S.", brand: "Frunch", tipo: "", code: "57", phone: "315 5637794" },
+        { id: "L30", supplier: "CRON FOODS SAS", brand: "fithub", tipo: "Pareto", code: "57", phone: "304 2153222" },
+        { id: "L31", supplier: "CAFÉ DIVINO S.A.S", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "L32", supplier: "FRIGORIFICO LA PARISIENNE S.A.", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "L33", supplier: "DELIPAVO S.A.S", brand: "Delipavo", tipo: "Pareto", code: "57", phone: "321 2155685" },
+        { id: "L34", supplier: "DELYNAT SAS", brand: "Prodelagro", tipo: "Pareto", code: "57", phone: "315 6966420" },
+        { id: "L35", supplier: "DISTRIBUIDORA SEMILLANANDA S.A.S.", brand: "Vida Sana", tipo: "Pareto", code: "57", phone: "317 2404444" },
+        { id: "L36", supplier: "EFFEKT S.A.S", brand: "Effekt", tipo: "Pareto", code: "57", phone: "304 6476364" },
+        { id: "L37", supplier: "EL JARRO PRODUCTOS S.A.S.", brand: "Snack Fit Me", tipo: "Pareto", code: "57", phone: "311 2936160" },
+        { id: "L38", supplier: "Elemental Foods S.A.S", brand: "Elemental Foods", tipo: "Pareto", code: "57", phone: "316 7746812" },
+        { id: "L39", supplier: "ELITE NUTRITION GROUP S.A.S.", brand: "Nutramerican", tipo: "Pareto", code: "57", phone: "321 7601447" },
+        { id: "L40", supplier: "ENTRE SEMILLAS SAS", brand: "Summa", tipo: "", code: "57", phone: "323 2331467" },
+        { id: "L41", supplier: "ESTUDIOS E INVERSIONES DUSHI S.A.S.", brand: "Dushi", tipo: "Pareto", code: "57", phone: "321 8116079" },
+        { id: "L42", supplier: "EUROCOL LTDA", brand: "Gallo", tipo: "Pareto", code: "57", phone: "" },
+        { id: "L43", supplier: "FASALACT SAS", brand: "Sketos", tipo: "Pareto", code: "57", phone: "321 9021287" },
+        { id: "L44", supplier: "FHN NUTRITION SAS", brand: "Fhn Nutrition", tipo: "Pareto", code: "57", phone: "321 3709409" },
+        { id: "L45", supplier: "FIT GARTEN S.A.S.", brand: "Fit Garten", tipo: "Pareto", code: "57", phone: "321 4371528" },
+        { id: "L46", supplier: "FIT NUTRITION USA S.A.S.", brand: "Athletical", tipo: "Pareto", code: "57", phone: "" },
+        { id: "L47", supplier: "FITT GLOBAL S.A.S.", brand: "Smart Shake", tipo: "Pareto", code: "57", phone: "" },
+        { id: "L48", supplier: "Fondant Cakes Ltda", brand: "Fondant cakes", tipo: "Pareto", code: "57", phone: "321 9143010" },
+        { id: "L49", supplier: "GRUPO JUCADI SAS", brand: "fithub", tipo: "Pareto", code: "57", phone: "318 4624066" },
+        { id: "L50", supplier: "HEALTHY SPORTS COLOMBIA", brand: "Healthy America", tipo: "Pareto", code: "57", phone: "" },
+        { id: "L51", supplier: "HERNANDO ARANGO ESCOBAR", brand: "La Banquiva", tipo: "Pareto", code: "57", phone: "311 3246880" },
+        { id: "L52", supplier: "IFN LAB S.A.S", brand: "Higgs", tipo: "Pareto", code: "57", phone: "" },
+        { id: "L53", supplier: "IKI VEGAN S.A.S", brand: "IKI Functional Foods", tipo: "Pareto", code: "57", phone: "" },
+        { id: "L54", supplier: "INDUSTRIAS DE ALIMENTOS PARA DIETAS ESPECIALES SAS", brand: "Vitad", tipo: "Pareto", code: "57", phone: "312 8141451" },
+        { id: "L55", supplier: "INDUSTRIAS SALUDABLES P&P S.A.S.", brand: "Pamela Perez", tipo: "Pareto", code: "57", phone: "312 4785827" },
+        { id: "L56", supplier: "INVERSIONES HUEVOS DOBLE OO SAS", brand: "Huevos Doble", tipo: "", code: "57", phone: "314 2041605" },
+        { id: "L57", supplier: "INVERSIONES PH PLUS SAS", brand: "Ph Plus", tipo: "Pareto", code: "57", phone: "323 4392470" },
+        { id: "L58", supplier: "EUB S.A.S", brand: "Es un Balance", tipo: "Pareto", code: "57", phone: "301 1700384" },
+        { id: "L59", supplier: "ISSAVP GROUP S.A.S", brand: "Natif", tipo: "Pareto", code: "57", phone: "311 7354603" },
+        { id: "L60", supplier: "JUAN CORDOBA FERNANDEZ", brand: "La Rambla", tipo: "Pareto", code: "57", phone: "300 5006258" },
+        { id: "L61", supplier: "Juan Fernando Hoyos", brand: "Moltovida", tipo: "Pareto", code: "57", phone: "302 4414327" },
+        { id: "L62", supplier: "KRIMA S.A.S", brand: "Krima", tipo: "Pareto", code: "57", phone: "" },
+        { id: "L63", supplier: "LUGOCORP SAS", brand: "Darkness", tipo: "Pareto", code: "57", phone: "" },
+        { id: "L64", supplier: "MACONDO TROPICAL FOOD S.A.S", brand: "Delipop", tipo: "Pareto", code: "57", phone: "322 8435267" },
+        { id: "L65", supplier: "MAFUN LINEA SALUDABLE DE COLOMBIA SAS", brand: "Krost", tipo: "Pareto", code: "57", phone: "300 8020747" },
+        { id: "L66", supplier: "MANA IMPORT S.A.S.", brand: "Club Kombucha", tipo: "Pareto", code: "57", phone: "314 5018958" },
+        { id: "L67", supplier: "MiCokito Sas", brand: "Mi Cokito", tipo: "", code: "57", phone: "301 3894528" },
+        { id: "L68", supplier: "MILAH`S COMPANY S.A.S", brand: "Bites By Milah's", tipo: "Pareto", code: "57", phone: "" },
+        { id: "L69", supplier: "MIVASSI REPOSTERIA SALUDABLE S.A.S.", brand: "Mivassi", tipo: "Pareto", code: "57", phone: "310 6095284" },
+        { id: "L70", supplier: "MUMU COLOMBIA SAS", brand: "Mumu", tipo: "Pareto", code: "57", phone: "305 4251953" },
+        { id: "L71", supplier: "OLU AND CO S.A.S", brand: "OLÜ", tipo: "Pareto", code: "57", phone: "316 8333691" },
+        { id: "L72", supplier: "PALAMANO SNACKS SAS", brand: "fithub", tipo: "Pareto", code: "57", phone: "317 3378684" },
+        { id: "L73", supplier: "PALANTE HOLDING S.A.S.", brand: "Fuxion", tipo: "Pareto", code: "57", phone: "320 5236596" },
+        { id: "L74", supplier: "PAN DE JUANISSS SAS", brand: "Siempre Natural", tipo: "Pareto", code: "57", phone: "316 2540387" },
+        { id: "L75", supplier: "PANGEA NATURAL PRODUCTS S.A.S.", brand: "Pangea", tipo: "Pareto", code: "57", phone: "316 0108510" },
+        { id: "L76", supplier: "Paula Andrea Vinasco Alvarez", brand: "fithub", tipo: "", code: "57", phone: "317 3378684" },
+        { id: "L77", supplier: "PERCIBIDO S.A.S", brand: "Manzato", tipo: "Pareto", code: "57", phone: "305 3341716" },
+        { id: "L78", supplier: "POWER LAB S.A.S.", brand: "Powerlab", tipo: "Pareto", code: "57", phone: "350 7057171" },
+        { id: "L79", supplier: "PRODUCTOS INTEGRALES VITAL S.A.S", brand: "Vital", tipo: "Pareto", code: "57", phone: "320 3108530" },
+        { id: "L80", supplier: "PRODUCTOS SALUGRAN LM S.A.S", brand: "fithub", tipo: "Pareto", code: "57", phone: "318 7122235" },
+        { id: "L81", supplier: "QUNNO S.A.S.", brand: "fithub", tipo: "Pareto", code: "57", phone: "318 7122235" },
+        { id: "L82", supplier: "ROSANNA BARROETA", brand: "Orence", tipo: "Pareto", code: "57", phone: "313 5466424" },
+        { id: "L83", supplier: "COAMESA DE COLOMBIA S.A.S", brand: "Silk", tipo: "Pareto", code: "57", phone: "" },
+        { id: "L84", supplier: "SAN MARTÍN LÁCTEOS S.A.S.", brand: "fithub", tipo: "Pareto", code: "57", phone: "310 6235251" },
+        { id: "L85", supplier: "SANTA REYES S.A.S", brand: "Gallina Feliz", tipo: "", code: "57", phone: "" },
+        { id: "L86", supplier: "SANTOSANO S.A.S.", brand: "Santosano", tipo: "Pareto", code: "57", phone: "300 8620836" },
+        { id: "L87", supplier: "SAVVY CORP S.A.S", brand: "Savvy", tipo: "Pareto", code: "57", phone: "313 2125701" },
+        { id: "L88", supplier: "SEGURIDAD ALIMENTARIA DE OCCIDENTE S A S", brand: "Quinoa Club", tipo: "Pareto", code: "57", phone: "315 4323200" },
+        { id: "L89", supplier: "SER FIT SAS", brand: "Ser Fit", tipo: "", code: "57", phone: "322 7506411" },
+        { id: "L90", supplier: "SIERRA FLOR COMPANY S.A.S.", brand: "Sierra Flor", tipo: "Pareto", code: "57", phone: "322 5820805" },
+        { id: "L91", supplier: "Silvana Gomez Fajardo", brand: "Kareem Foods", tipo: "Pareto", code: "57", phone: "3124822039" },
+        { id: "L92", supplier: "SKINNY INVESTMENT S.A.S", brand: "Fitcook", tipo: "Pareto", code: "57", phone: "317 6406132" },
+        { id: "L93", supplier: "SPIGA FOODS SAS", brand: "Spiga", tipo: "Pareto", code: "57", phone: "320 5219710" },
+        { id: "L94", supplier: "SUPERFUDS S.A.S.", brand: "Api Natural", tipo: "Pareto", code: "57", phone: "" },
+        { id: "L95", supplier: "Suplementos Macronutrition S.A.S.", brand: "Macroblends", tipo: "Pareto", code: "57", phone: "301 2002223" },
+        { id: "L96", supplier: "SYNERGETIC SAS BIC", brand: "Herbivore Protein", tipo: "Pareto", code: "57", phone: "3017474797" },
+        { id: "L97", supplier: "TODOS COMEMOS SAS", brand: "Franuí", tipo: "Pareto", code: "57", phone: "310 4820459" },
+        { id: "L98", supplier: "UP NUTRICIONAL FOOD SAS", brand: "Wake Up", tipo: "Pareto", code: "57", phone: "304 6048310" },
+        { id: "L99", supplier: "VITAL SETAS S.A.S", brand: "Vital Setas", tipo: "Pareto", code: "57", phone: "323 5740413" },
+        { id: "L100", supplier: "WAKABA PRODUCTOS NATURALES SAS", brand: "Wakaba", tipo: "", code: "57", phone: "310 4544953" },
+        { id: "L101", supplier: "WE ARE ASTRA S.A.S.", brand: "NotCo", tipo: "Pareto", code: "57", phone: "" },
+        { id: "L102", supplier: "You Can SAS", brand: "Dymatize", tipo: "Pareto", code: "57", phone: "322 5421445" }
+    ],
+    "MARTES": [
+        { id: "M1", supplier: "W&T FOOD S.A.S", brand: "Origen Natural", tipo: "", code: "57", phone: "311 4700107" },
+        { id: "M2", supplier: "EKII FOODS S.A.S.", brand: "Ekii", tipo: "", code: "57", phone: "310 6765655" },
+        { id: "M3", supplier: "AGROPECUARIA AGUACLARA S.A.S", brand: "fithub", tipo: "", code: "57", phone: "300 8036962" },
+        { id: "M4", supplier: "AGUDELO GOMEZ LAURA", brand: "Alara", tipo: "", code: "57", phone: "" },
+        { id: "M5", supplier: "ALIMENTOS EL DORADO", brand: "El Dorado", tipo: "", code: "57", phone: "313 4430938" },
+        { id: "M6", supplier: "ALIMENTOS NATURALES OKARA S.A.S", brand: "Okara", tipo: "", code: "57", phone: "" },
+        { id: "M7", supplier: "ALVES ALIMENTOS VEGETALES S.A.S.", brand: "Alves", tipo: "", code: "57", phone: "" },
+        { id: "M8", supplier: "ANDRÉS ORLANDO BORDA REYES", brand: "Marimilafit", tipo: "", code: "57", phone: "" },
+        { id: "M9", supplier: "HIIVA FERMENTADOS S.A.S", brand: "Viiva", tipo: "", code: "57", phone: "316 3343686" },
+        { id: "M10", supplier: "ASOCIACION DE ALIMENTOS DEL DERIVADO DE LA YUCA", brand: "De Chorrera", tipo: "", code: "57", phone: "" },
+        { id: "M11", supplier: "ANITA´S BROWNIES S.A.S.", brand: "Anita's Brownies", tipo: "", code: "57", phone: "" },
+        { id: "M12", supplier: "BE FOOD SAS S.A.S", brand: "Be Food", tipo: "", code: "57", phone: "" },
+        { id: "M13", supplier: "BIOGAR ECO SAS", brand: "Biogar", tipo: "", code: "57", phone: "" },
+        { id: "M14", supplier: "PHILIPPE PASTELERIA S A S", brand: "Philippe", tipo: "", code: "57", phone: "316 0106522" },
+        { id: "M15", supplier: "CARLOS ALFONSO CUERVO RODRIGUEZ", brand: "BreadBell", tipo: "", code: "57", phone: "" },
+        { id: "M16", supplier: "CENTURION FOODS S.A.S", brand: "Centurión", tipo: "", code: "57", phone: "" },
+        { id: "M17", supplier: "CEZA S.A.S", brand: "Protein Bakes", tipo: "", code: "57", phone: "" },
+        { id: "M18", supplier: "COMERCIALIZADORA AGROSIGO S A S", brand: "Catalan", tipo: "", code: "57", phone: "" },
+        { id: "M19", supplier: "DEL ALBA S.A", brand: "Del Alba", tipo: "", code: "57", phone: "" },
+        { id: "M20", supplier: "DELGADO NICHOLLS MANUELA", brand: "Seedology Co", tipo: "", code: "57", phone: "" },
+        { id: "M21", supplier: "DISTRIBUIDORA DE COMESTIBLES NACIONALES Y EXTRANJEROS SAS", brand: "Al Barakah Dates", tipo: "", code: "57", phone: "" },
+        { id: "M22", supplier: "Distribuidora de Sabores Prodisabor Sas", brand: "Seri Foods", tipo: "", code: "57", phone: "" },
+        { id: "M23", supplier: "E.QUATRO S.A.S", brand: "Almendrola", tipo: "", code: "57", phone: "" },
+        { id: "M24", supplier: "EL DORADO COMEX S.A.S", brand: "El Dorado", tipo: "", code: "57", phone: "" },
+        { id: "M25", supplier: "FRUANDES FRUTOS DE LOS ANDES S.A.S", brand: "Fruandes", tipo: "", code: "57", phone: "322 8877073" },
+        { id: "M26", supplier: "GREEN PERFORMANCE S.A.S", brand: "Conquesta", tipo: "", code: "57", phone: "" },
+        { id: "M27", supplier: "GRUPO INFESA S.A.S", brand: "Kanú", tipo: "", code: "57", phone: "316 0253326" },
+        { id: "M28", supplier: "GRUPO TRADIZIONE S.A.S.", brand: "Tradizione", tipo: "", code: "57", phone: "316 7256874" },
+        { id: "M29", supplier: "HAAN SAS", brand: "Paranice", tipo: "", code: "57", phone: "" },
+        { id: "M30", supplier: "HACIENDA GOURMET S.A.S.", brand: "Hacienda Gourmet", tipo: "", code: "57", phone: "311 6350737" },
+        { id: "M31", supplier: "Incubadora Santander S A", brand: "Kikes", tipo: "", code: "57", phone: "321 2643139" },
+        { id: "M32", supplier: "INDUSTRIA DE GALLETAS GRECO S.A", brand: "Kalá", tipo: "", code: "57", phone: "316 5373342" },
+        { id: "M33", supplier: "INVERSISA S.A.S", brand: "Mr Bono", tipo: "", code: "57", phone: "315 3502789" },
+        { id: "M34", supplier: "JELA DRINKS S.A.S", brand: "Wasser", tipo: "", code: "57", phone: "318 4019610" },
+        { id: "M35", supplier: "JOHNNY ORDOGOISTIA (PUNTO VERDE)", brand: "Dolcezza", tipo: "", code: "57", phone: "301 2197417" },
+        { id: "M36", supplier: "Juliana Arango", brand: "Hacienda la Victoria", tipo: "", code: "57", phone: "314 4123388" },
+        { id: "M37", supplier: "NOE CABRALES SAS", brand: "Noe Cabrales", tipo: "", code: "57", phone: "310 6132553" },
+        { id: "M38", supplier: "Luz Helena Figueroa", brand: "HelenaXioccolats", tipo: "", code: "57", phone: "310 8506007" },
+        { id: "M39", supplier: "MARAÑONES DE LA ORINOQUIA SAS", brand: "Kju", tipo: "", code: "57", phone: "300 5473869" },
+        { id: "M40", supplier: "MINKA FUDZ S.A.S.", brand: "Nack Crew", tipo: "", code: "57", phone: "310 6024564" },
+        { id: "M41", supplier: "AMAZON PUTUMAYO RIVER S.A.S", brand: "Amapuri", tipo: "", code: "57", phone: "" },
+        { id: "M42", supplier: "MORENOS S.A.S", brand: "Ricola", tipo: "", code: "57", phone: "318 6494966" },
+        { id: "M43", supplier: "NATURAL CONEXION S.A.S", brand: "Econativa", tipo: "", code: "57", phone: "321 4610503" },
+        { id: "M44", supplier: "OM SHANTI OM SAS", brand: "Om Shanti Om", tipo: "", code: "57", phone: "" },
+        { id: "M45", supplier: "ORLANDO GONZÁLEZ (QUESOY)", brand: "fithub", tipo: "", code: "57", phone: "305 8150695" },
+        { id: "M46", supplier: "PROBÁ S.A.S.", brand: "Probá Snacks", tipo: "", code: "57", phone: "301 5862879" },
+        { id: "M47", supplier: "PRODUCCIÓN ANDINA S.A.S.", brand: "Biota", tipo: "", code: "57", phone: "321 4727460" },
+        { id: "M48", supplier: "VITAGRO S.A.S", brand: "VitaJuz", tipo: "", code: "57", phone: "3167448907" },
+        { id: "M49", supplier: "SABBAG CHALELA NADIA MARIA", brand: "Fenicia", tipo: "", code: "57", phone: "300 5518057" },
+        { id: "M50", supplier: "SARY SOCIEDAD POR ACCIONES SIMPLIFICADA", brand: "Sary", tipo: "", code: "57", phone: "311 6340873" },
+        { id: "M51", supplier: "SERVICIOS NUTRESA S.A.S.", brand: "Badia", tipo: "", code: "57", phone: "" },
+        { id: "M52", supplier: "SICCUM S.A.S.", brand: "Froozdy", tipo: "", code: "57", phone: "311 5611010" },
+        { id: "M53", supplier: "SIMPLE DISTRIBUCION SAS", brand: "Bioessens", tipo: "", code: "57", phone: "" },
+        { id: "M54", supplier: "SVNUTS S.A.S.", brand: "Svnuts", tipo: "", code: "57", phone: "321 8038357" },
+        { id: "M55", supplier: "VECTOR FOODS SAS", brand: "Monterojo", tipo: "", code: "57", phone: "300 1291185" },
+        { id: "M56", supplier: "FOODIESCHIPS S.A.S.", brand: "fithub", tipo: "", code: "57", phone: "320 5420114" },
+        { id: "M57", supplier: "Yatote SAS", brand: "Yayote", tipo: "", code: "57", phone: "311 7125678" },
+        { id: "M58", supplier: "SUPLEMENTOS DE COLOMBIA S.A.S.", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "M59", supplier: "SAVORY SUPPLY S.A.S", brand: "Savory Supply", tipo: "", code: "57", phone: "" },
+        { id: "M60", supplier: "AFUEGO COMPANY", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "M61", supplier: "AGROAVICOLA SAN MARINO S A", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "M62", supplier: "ARANDANOS DE VIDA S.A.S.", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "M63", supplier: "AREPAS LAMARY SAS", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "M64", supplier: "BRANDES COLOMBIA S.A.S", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "M65", supplier: "CAFE DE SANTA BARBARA S.A.S.", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "M66", supplier: "CANNBIA LAB S.A.S", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "M67", supplier: "CARAVELA COLOMBIA S.A.S", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "M68", supplier: "CATALINA CHAR PIEDRAHITA", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "M69", supplier: "CHL S.A.S.", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "M70", supplier: "COMERCIALIZADORA DE REFRIGERADOS NUTRESA SAS", brand: "", tipo: "", code: "57", phone: "" }
+    ],
+    "MIERCOLES": [
+        { id: "X1", supplier: "ABC COCINA S.A.S.", brand: "Del Origen", tipo: "Pareto", code: "57", phone: "" },
+        { id: "X2", supplier: "TOLEDALES S.A.S.", brand: "Toledales", tipo: "", code: "57", phone: "310 3145223" },
+        { id: "X3", supplier: "ALIMENTOS Y BEBIDAS VALTIK S A S", brand: "Titanium", tipo: "", code: "57", phone: "" },
+        { id: "X4", supplier: "ALIMENTOS SALUDABLES FIT JUICE S.A.S", brand: "Fit Juice", tipo: "", code: "57", phone: "" },
+        { id: "X5", supplier: "Natural Roka", brand: "Crystal Älum", tipo: "", code: "57", phone: "301 7233073" },
+        { id: "X6", supplier: "NUTTI SAS", brand: "Nutti", tipo: "", code: "57", phone: "315 8006083" },
+        { id: "X7", supplier: "ALUNT S.A.S.", brand: "Lakanto", tipo: "", code: "57", phone: "" },
+        { id: "X8", supplier: "ANA CONSTANZA RAMIREZ RUIZ", brand: "La Fantástica", tipo: "", code: "57", phone: "" },
+        { id: "X9", supplier: "PRODUCTOS KUMARA SAS", brand: "Nuaqui", tipo: "", code: "57", phone: "317 6459156" },
+        { id: "X10", supplier: "AROMAS Y SABORES TECNICOS DE COLOMBIA S.A.", brand: "Alma", tipo: "", code: "57", phone: "" },
+        { id: "X11", supplier: "BATATICA FIT S.A.S", brand: "Bataticafit", tipo: "", code: "57", phone: "" },
+        { id: "X12", supplier: "BENDICION DE COSECHA S A S", brand: "Bencos", tipo: "", code: "57", phone: "" },
+        { id: "X13", supplier: "INDUSTRIAS VIVA NATUR S.A.S.", brand: "Viva Natur", tipo: "", code: "57", phone: "" },
+        { id: "X14", supplier: "CAFE DE SANTA BARBARA S.A.S.", brand: "Pergamino", tipo: "", code: "57", phone: "" },
+        { id: "X15", supplier: "ALTARO CORP SAS", brand: "Kaffeto Gourmet", tipo: "", code: "57", phone: "" },
+        { id: "X16", supplier: "ROMAN HERNANDEZ ALCIRA", brand: "La Chila", tipo: "", code: "57", phone: "321 2287588" },
+        { id: "X17", supplier: "CULTIVIA SAS", brand: "Oa Foods", tipo: "", code: "57", phone: "" },
+        { id: "X18", supplier: "PISCÚ S.A.S", brand: "Piscú", tipo: "", code: "57", phone: "300 2210946" },
+        { id: "X19", supplier: "NUTRISAZÓN S.A.S", brand: "Sazón Selecto", tipo: "", code: "57", phone: "321 4237182" },
+        { id: "X20", supplier: "DANS LE FOOD S.A.S.", brand: "Dans Le Food", tipo: "", code: "57", phone: "" },
+        { id: "X21", supplier: "MRM INVESTMENT GROUP SAS", brand: "Selvit", tipo: "", code: "57", phone: "312 6912629" },
+        { id: "X22", supplier: "MIA ENTERPRISE S.A.S", brand: "Mias", tipo: "Pareto", code: "57", phone: "350 5437226" },
+        { id: "X23", supplier: "DAKSHA ROSADO HENRIQUEZ", brand: "Pakeeto", tipo: "", code: "57", phone: "" },
+        { id: "X24", supplier: "FEED IN CO S.A.S.", brand: "Avee Fib", tipo: "", code: "57", phone: "" },
+        { id: "X25", supplier: "TEIZEN CO S.A.S.", brand: "Teizen", tipo: "", code: "57", phone: "3163077172" },
+        { id: "X26", supplier: "GASEOSAS LUX S.A.S.", brand: "Cristal", tipo: "", code: "57", phone: "" },
+        { id: "X27", supplier: "ANGELA MARIA MARTINES BITAR", brand: "Baimi", tipo: "", code: "57", phone: "" },
+        { id: "X28", supplier: "INDUSTRIA NACIONAL DE GASEOSAS S.A", brand: "Brisa", tipo: "", code: "57", phone: "" },
+        { id: "X29", supplier: "MIEL DE LA CUMBRE S.A.S", brand: "La Cumbre", tipo: "", code: "57", phone: "311 6046127" },
+        { id: "X30", supplier: "JQ ASOCIADOS SAS", brand: "Going", tipo: "", code: "57", phone: "" },
+        { id: "X31", supplier: "KONFYT S.A.S", brand: "Konfyt", tipo: "", code: "57", phone: "" },
+        { id: "X32", supplier: "LETOS S.A.S.", brand: "Arm & Hammer", tipo: "", code: "57", phone: "" },
+        { id: "X33", supplier: "COMERCIALIZADORA ATEYBA C.I S.A.S", brand: "Ateyba", tipo: "", code: "57", phone: "" },
+        { id: "X34", supplier: "ZENDIETCLUB S.A.S", brand: "Zendietclub", tipo: "", code: "57", phone: "317 7129795" },
+        { id: "X35", supplier: "MONKEY BREAK S.A.S", brand: "Monkey", tipo: "", code: "57", phone: "314 5410520" },
+        { id: "X36", supplier: "PARAMO SNACKS S.A.S. BIC", brand: "Good Chips", tipo: "", code: "57", phone: "321 7570181" },
+        { id: "X37", supplier: "PASTA ARTESANALE G.L.G. S.A.S.", brand: "IL Castello", tipo: "", code: "57", phone: "318 5864047" },
+        { id: "X38", supplier: "POSTOBON S.A.", brand: "Cristal", tipo: "", code: "57", phone: "" },
+        { id: "X39", supplier: "FRIGORIFICO LA PARISIENNE S.A.", brand: "La Parisienne", tipo: "", code: "57", phone: "" },
+        { id: "X40", supplier: "SMUH S.A.S", brand: "SMUH", tipo: "", code: "57", phone: "315 2978262" },
+        { id: "X41", supplier: "TAPI FOODS S.A.S.", brand: "Somos Pita", tipo: "", code: "57", phone: "319 6950370" },
+        { id: "X42", supplier: "TELMO J DIAZ Y CIA SA", brand: "Café Mesa de los Santos", tipo: "", code: "57", phone: "316 4406791" },
+        { id: "X43", supplier: "COMERCIALIZADORA SAMUEL S.A.S.", brand: "Mekaddesh", tipo: "", code: "57", phone: "" },
+        { id: "X44", supplier: "Tutaa Sociedad por Acciones Simplificadas", brand: "Petmeal", tipo: "", code: "57", phone: "321 4754013" },
+        { id: "X45", supplier: "D´PRISCO", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "X46", supplier: "FRUTTEC EXPRESS S.A.S. BIC", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "X47", supplier: "Fumage Gourmet Colombia SAS", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "X48", supplier: "GRUPO FH S.A.S.", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "X49", supplier: "ISLAG INVESTMENTS S.A.S", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "X50", supplier: "KALPA FOODS S.A.S.", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "X51", supplier: "Laboratorios Natural Freshly Infabo S.A.S.", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "X52", supplier: "LOMA", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "X53", supplier: "MANITOBA S.A.S.", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "X54", supplier: "MOIS", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "X55", supplier: "NDUSTRIAS ARGOS SAS", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "X56", supplier: "THE INTERNATIONAL EXECUTIVE LTDA", brand: "", tipo: "", code: "57", phone: "" }
+    ],
+    "JUEVES": [
+        { id: "J1", supplier: "VIVES JAIMES CRISTINA ISABEL", brand: "Suvifit", tipo: "", code: "57", phone: "3105243083" },
+        { id: "J2", supplier: "ALIMENTOS MAKARENA SAS", brand: "Mauka", tipo: "", code: "57", phone: "" },
+        { id: "J3", supplier: "GIOVENT S.A.S", brand: "Kamochips", tipo: "", code: "57", phone: "" },
+        { id: "J4", supplier: "ALPINA PRODUCTOS ALIMENTICIOS S.A. BIC", brand: "Alpina", tipo: "", code: "57", phone: "" },
+        { id: "J5", supplier: "TABI CLEAN COLOMBIA SAS", brand: "Tabi Clean", tipo: "", code: "57", phone: "316 3194659" },
+        { id: "J6", supplier: "TOP SPUN SAS", brand: "Top Spun", tipo: "", code: "57", phone: "318 5480618" },
+        { id: "J7", supplier: "COMPAÑIA PESQUERA DEL MAR S.A.S", brand: "Pesquera del Mar", tipo: "", code: "57", phone: "" },
+        { id: "J8", supplier: "CORUSCARE S.A.S", brand: "Denti Essence", tipo: "", code: "57", phone: "" },
+        { id: "J9", supplier: "CUCINA GROUP S.A.S.", brand: "Piatto", tipo: "", code: "57", phone: "" },
+        { id: "J10", supplier: "SATTVA WELLNESS S.A.S", brand: "Gooms", tipo: "", code: "57", phone: "320 4299588" },
+        { id: "J11", supplier: "DISTRIBUIDORA SEMILLANANDA S.A.S.", brand: "Vida Sana", tipo: "", code: "57", phone: "" },
+        { id: "J12", supplier: "ECO LE PONT SAS", brand: "Eco Le Pont", tipo: "", code: "57", phone: "" },
+        { id: "J13", supplier: "EL JARRO PRODUCTOS S.A.S.", brand: "Snack Fit Me", tipo: "", code: "57", phone: "" },
+        { id: "J14", supplier: "ELITE NUTRITION GROUP S.A.S.", brand: "Nutramerican", tipo: "", code: "57", phone: "" },
+        { id: "J15", supplier: "ESTUDIOS E INVERSIONES DUSHI S.A.S.", brand: "Dushi", tipo: "", code: "57", phone: "" },
+        { id: "J16", supplier: "INVERSIONES COOL DRINK S.A.S", brand: "Cool Drink", tipo: "", code: "57", phone: "" },
+        { id: "J17", supplier: "MAHATI S.A.S", brand: "Mahati", tipo: "", code: "57", phone: "" },
+        { id: "J18", supplier: "BIOSA COLOMBIA S.A.S", brand: "Vita Biosa", tipo: "", code: "57", phone: "" },
+        { id: "J19", supplier: "Angie Camila Lozano", brand: "Huula Peach", tipo: "", code: "57", phone: "" },
+        { id: "J20", supplier: "KARMEN FOODS S.A.S.", brand: "Kerriko", tipo: "", code: "57", phone: "" },
+        { id: "J21", supplier: "MANATA SALUDABLE SAS", brand: "Manata", tipo: "", code: "57", phone: "" },
+        { id: "J22", supplier: "MARIA CONSUELO PINEDA ZAPATA", brand: "Konzudely", tipo: "", code: "57", phone: "" },
+        { id: "J23", supplier: "MY ECOHOME S.A.S.", brand: "Ecohome", tipo: "", code: "57", phone: "" },
+        { id: "J24", supplier: "Limonato Sas", brand: "Limonato", tipo: "", code: "57", phone: "" },
+        { id: "J25", supplier: "CARIBBEAN GREEN POWER S.A.S.", brand: "Serena Wellness Plant", tipo: "", code: "57", phone: "" },
+        { id: "J26", supplier: "GRUPO FRUTELLI SAS", brand: "Naturanja", tipo: "", code: "57", phone: "" },
+        { id: "J27", supplier: "KAKAO KLUB S.A.S.", brand: "Chocolates Mundial", tipo: "", code: "57", phone: "" },
+        { id: "J28", supplier: "PRODUCTORA DE ALIMENTOS NANY SAS", brand: "Nany", tipo: "", code: "57", phone: "" },
+        { id: "J29", supplier: "ALIMENTOS ARTESANALES PANZENU SAS", brand: "Anak", tipo: "", code: "57", phone: "" },
+        { id: "J30", supplier: "ALIMENTOS NUTRELLE S.A.S.", brand: "Nutrelle", tipo: "", code: "57", phone: "" },
+        { id: "J31", supplier: "ALL NATURAL COLOMBIA S.A.S.", brand: "All Natural", tipo: "", code: "57", phone: "" },
+        { id: "J32", supplier: "QUNNO S.A.S.", brand: "fithub", tipo: "", code: "57", phone: "314 6301245" },
+        { id: "J33", supplier: "INTERAMERICAN FOODS S.A.S.", brand: "Seeds", tipo: "", code: "57", phone: "" },
+        { id: "J34", supplier: "PLASTIGESTION DEL CARIBE S.A.S", brand: "Hidrapro", tipo: "", code: "57", phone: "" },
+        { id: "J35", supplier: "INVERSIONES SILVA MOISES S.A.S.", brand: "Camoi", tipo: "", code: "57", phone: "" },
+        { id: "J36", supplier: "SER FIT SAS", brand: "Ser Fit", tipo: "", code: "57", phone: "322 7506411" },
+        { id: "J37", supplier: "SKINNY INVESTMENT S.A.S", brand: "Fitcook", tipo: "", code: "57", phone: "317 6406132" },
+        { id: "J38", supplier: "SPIGA FOODS SAS", brand: "Spiga", tipo: "", code: "57", phone: "320 5219710" },
+        { id: "J39", supplier: "Baronessa Foods S.A.S", brand: "Funky Nuts", tipo: "", code: "57", phone: "" },
+        { id: "J40", supplier: "VEGAN MIXES SAS", brand: "Vegan Life", tipo: "", code: "57", phone: "320 4927539" },
+        { id: "J41", supplier: "WODCREAM SNACKS SAS", brand: "Wodcream", tipo: "", code: "57", phone: "320 7684579" },
+        { id: "J42", supplier: "IKI SOUL S.A.S.", brand: "Iki soul", tipo: "", code: "57", phone: "" },
+        { id: "J43", supplier: "Proscience", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "J44", supplier: "WUNDERWELT", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "J45", supplier: "VASS RED SAS", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "J46", supplier: "ALIMENTOS VITALSINU SAS", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "J47", supplier: "ISLAG INVESTMENTS", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "J48", supplier: "GRUPO DOSESE SAS", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "J49", supplier: "GRUPO SUAGU SAS", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "J50", supplier: "Pricesmart Colombia S A S", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "J51", supplier: "PRODUCIR INTEGRAL COLOMBIA SAS", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "J52", supplier: "SOLUTIONS COLOMBIA S.A.S", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "J53", supplier: "VITANOVA GROUP S.A.S.", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "J54", supplier: "WUNDERWELT SAS", brand: "", tipo: "", code: "57", phone: "" }
+    ],
+    "VIERNES": [
+        { id: "V1", supplier: "ABC COCINA S.A.S.", brand: "Del Origen", tipo: "", code: "57", phone: "" },
+        { id: "V2", supplier: "G.E.N. TECH COLOMBIA S.A.S", brand: "Gentech", tipo: "", code: "57", phone: "" },
+        { id: "V3", supplier: "INTERFUDS COLOMBIA S.A.S.", brand: "Sabatino", tipo: "", code: "57", phone: "" },
+        { id: "V4", supplier: "ALIMENTOS NATURALES OKARA S.A.S", brand: "Okara", tipo: "", code: "57", phone: "" },
+        { id: "V5", supplier: "ALSA FOODS S.A.S.", brand: "fithub", tipo: "", code: "57", phone: "" },
+        { id: "V6", supplier: "FORMULABS S.A.S.", brand: "Carlson", tipo: "", code: "57", phone: "" },
+        { id: "V7", supplier: "HOOLI COLOMBIA SAS", brand: "Hooli", tipo: "", code: "57", phone: "" },
+        { id: "V8", supplier: "BIO-OIL S.A.S.", brand: "fithub", tipo: "", code: "57", phone: "" },
+        { id: "V9", supplier: "LEVEL5 NUTRITION S.A.S.", brand: "Bitty", tipo: "", code: "57", phone: "" },
+        { id: "V10", supplier: "BLUM ORGANICS SAS", brand: "Baby Evolution", tipo: "", code: "57", phone: "" },
+        { id: "V11", supplier: "PHILIPPE PASTELERIA S A S", brand: "Philippe", tipo: "", code: "57", phone: "" },
+        { id: "V12", supplier: "COMERCIALIZADORA AGROSIGO S A S", brand: "Catalan", tipo: "", code: "57", phone: "" },
+        { id: "V13", supplier: "COMPAÑÍA NACIONAL DE BEBIDAS S.A.S.", brand: "Más", tipo: "", code: "57", phone: "" },
+        { id: "V14", supplier: "Cristina Rodriguez", brand: "Happy Premium Chocolate", tipo: "", code: "57", phone: "" },
+        { id: "V15", supplier: "LTC BEVERAGES S.A.S", brand: "Kling", tipo: "", code: "57", phone: "" },
+        { id: "V16", supplier: "DISTRIBUCIONES DEPORTIVAS ZONA CARDIO S.A.S.", brand: "GU", tipo: "", code: "57", phone: "" },
+        { id: "V17", supplier: "OYOLA DIAZ ANDRES FELIPE", brand: "Arvada", tipo: "", code: "57", phone: "" },
+        { id: "V18", supplier: "OH HONEY S.A.S.", brand: "Oh Honey", tipo: "", code: "57", phone: "" },
+        { id: "V19", supplier: "ADMINISTRACION DE RECURSOS Y OPORTUNIDADES S.A.S.", brand: "Natural Heaven", tipo: "", code: "57", phone: "" },
+        { id: "V20", supplier: "ALIMENTOS LIFT SAS", brand: "Zúbu", tipo: "", code: "57", phone: "" },
+        { id: "V21", supplier: "GRUPO TRADIZIONE S.A.S.", brand: "Tradizione", tipo: "", code: "57", phone: "" },
+        { id: "V22", supplier: "CARIBBEAN KRUNCH S.A.S.", brand: "Rustle", tipo: "", code: "57", phone: "" },
+        { id: "V23", supplier: "INDUSTRIAS MECAFOODS SAS", brand: "fithub", tipo: "", code: "57", phone: "" },
+        { id: "V24", supplier: "SELVATICA SAS", brand: "Selvática", tipo: "", code: "57", phone: "" },
+        { id: "V25", supplier: "Juan Fernando Hoyos", brand: "Moltovida", tipo: "", code: "57", phone: "" },
+        { id: "V26", supplier: "SELVA FRESCA S.A.S.", brand: "Selva Fresca", tipo: "", code: "57", phone: "" },
+        { id: "V27", supplier: "STEPHANY MUNERA MONSALVE", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "V28", supplier: "LA FAMILIA MAFEFIT S.A.S.", brand: "Mafefit", tipo: "", code: "57", phone: "" },
+        { id: "V29", supplier: "NOE CABRALES SAS", brand: "Noe Cabrales", tipo: "", code: "57", phone: "" },
+        { id: "V30", supplier: "PERFECT TEN PROTEINS S.A.S", brand: "Perfect Ten Proteins", tipo: "", code: "57", phone: "" },
+        { id: "V31", supplier: "PURASSANA SAS", brand: "Grassana", tipo: "", code: "57", phone: "" },
+        { id: "V32", supplier: "Luz Helena Figueroa", brand: "HelenaXioccolats", tipo: "", code: "57", phone: "" },
+        { id: "V33", supplier: "MAGIA NEGRA CHOCOLATERIA SAS", brand: "Magia Negra", tipo: "", code: "57", phone: "" },
+        { id: "V34", supplier: "MEBO S A S", brand: "TOT", tipo: "", code: "57", phone: "" },
+        { id: "V35", supplier: "ELISEO ALEXANDER VILLAMIL RODRIGUEZ", brand: "Emmas Foods", tipo: "", code: "57", phone: "" },
+        { id: "V36", supplier: "NUFOODS SAS", brand: "fithub", tipo: "", code: "57", phone: "" },
+        { id: "V37", supplier: "ORLANDO GONZÁLEZ (QUESOY)", brand: "fithub", tipo: "", code: "57", phone: "" },
+        { id: "V38", supplier: "PREMIUM CHOICE S.A.S.", brand: "Emborg", tipo: "", code: "57", phone: "" },
+        { id: "V39", supplier: "PROBÁ S.A.S.", brand: "Probá Snacks", tipo: "", code: "57", phone: "" },
+        { id: "V40", supplier: "SANTA REYES S.A.S", brand: "Gallina Feliz", tipo: "", code: "57", phone: "" },
+        { id: "V41", supplier: "SARY SOCIEDAD POR ACCIONES SIMPLIFICADA", brand: "Sary", tipo: "", code: "57", phone: "" },
+        { id: "V42", supplier: "SAY BIZ SAS", brand: "Sayfit", tipo: "", code: "57", phone: "" },
+        { id: "V43", supplier: "SICCUM S.A.S.", brand: "Froozdy", tipo: "", code: "57", phone: "" },
+        { id: "V44", supplier: "STAY ORGANIC SAS.", brand: "Badem", tipo: "", code: "57", phone: "" },
+        { id: "V45", supplier: "MIA ENTERPRISE S.A.S", brand: "Mias", tipo: "", code: "57", phone: "" },
+        { id: "V46", supplier: "TOSTADITOS SUSANITA S.A.S", brand: "Susanita", tipo: "", code: "57", phone: "" },
+        { id: "V47", supplier: "FOODIESCHIPS S.A.S.", brand: "fithub", tipo: "", code: "57", phone: "" },
+        { id: "V48", supplier: "Pravista LLC", brand: "Rip Van", tipo: "", code: "57", phone: "" },
+        { id: "V49", supplier: "Yatote SAS", brand: "Yayote", tipo: "", code: "57", phone: "" },
+        { id: "V50", supplier: "GOURMET A PORTER SAS", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "V51", supplier: "INDUSTRIAS ALIMENTICIAS PINAR DEL RIO S.A.S.", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "V52", supplier: "MADAME SUCREE S A S", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "V53", supplier: "AL ALMA GROUP S.A.S.", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "V54", supplier: "ALMAGRANDE INVERSIONES S.A.S.", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "V55", supplier: "Natalia Pombo Corte", brand: "Mai", tipo: "", code: "57", phone: "" },
+        { id: "V56", supplier: "MONKEY BREAK S.A.S", brand: "", tipo: "", code: "57", phone: "" },
+        { id: "V57", supplier: "FOODS AND DRINKS ALIMENTOS S.A.S.", brand: "", tipo: "", code: "57", phone: "" }
+    ]
+};
+
+const MESSAGE_WA = "Hola, ¿cómo estás? 😊 Quería preguntarte cómo van los despachos de las órdenes de compra pendientes que tenemos actualmente. Estuve revisando y veo que aún hay algunos pedidos por entregar. ¿Me cuentas por favor cómo avanzan y si tienes alguna novedad? Muchas gracias";
+
+let currentWeek = 1;
+let currentDay = "LUNES";
+let onlyObsFilter = false;
+let appState = {};
+
+// Inicialización de la App
+window.onload = function() {
+    setupWeekSelector();
+    loadLocalStorage();
+    renderTable();
+};
+
+function setupWeekSelector() {
+    const select = document.getElementById("weekSelect");
+    for (let i = 1; i <= 52; i++) {
+        const opt = document.createElement("option");
+        opt.value = i;
+        opt.innerText = `Semana ${i}`;
+        select.appendChild(opt);
+    }
+}
+
+function loadLocalStorage() {
+    const saved = localStorage.getItem("frecuencia_pedidos_2026_db");
+    if (saved) {
+        appState = JSON.parse(saved);
+    } else {
+        // Clonar datos maestra
+        appState = {
+            master: JSON.parse(JSON.stringify(initialMasterData)),
+            history: {} // Guardará semana -> día -> item_id -> {stf15, stf51, obs}
+        };
+        saveLocalStorage();
+    }
+}
+
+function saveLocalStorage() {
+    localStorage.setItem("frecuencia_pedidos_2026_db", JSON.stringify(appState));
+}
+
+function changeWeek() {
+    currentWeek = document.getElementById("weekSelect").value;
+    renderTable();
+}
+
+function setDay(day) {
+    currentDay = day;
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.innerText.toUpperCase() === day || (day === "MIERCOLES" && btn.innerText.includes("Miércoles")));
+    });
+    renderTable();
+}
+
+function getWeekDayState(week, day) {
+    if (!appState.history[week]) appState.history[week] = {};
+    if (!appState.history[week][day]) appState.history[week][day] = {};
+    return appState.history[week][day];
+}
+
+function updateItemState(itemId, field, value) {
+    const dayState = getWeekDayState(currentWeek, currentDay);
+    if (!dayState[itemId]) {
+        dayState[itemId] = { stf15: false, stf51: false, obs: "" };
+    }
+    dayState[itemId][field] = value;
+    
+    saveLocalStorage();
+    updateKPIs();
+
+    // Actualizar estilo visual de la fila si tiene observación
+    const tr = document.getElementById(`tr-${itemId}`);
+    if (tr) {
+        const hasObs = dayState[itemId].obs && dayState[itemId].obs.trim() !== "";
+        tr.classList.toggle("has-observation", !!hasObs);
+    }
+}
+
+function renderTable() {
+    const tbody = document.getElementById("tableBody");
+    tbody.innerHTML = "";
+
+    const suppliers = appState.master[currentDay] || [];
+    const dayState = getWeekDayState(currentWeek, currentDay);
+
+    suppliers.forEach(item => {
+        const itemData = dayState[item.id] || { stf15: false, stf51: false, obs: "" };
+        const hasObs = itemData.obs && itemData.obs.trim() !== "";
+
+        if (onlyObsFilter && !hasObs) {
+            return; // Filtro de observaciones activo
+        }
+
+        const tr = document.createElement("tr");
+        tr.id = `tr-${item.id}`;
+        if (hasObs) tr.classList.add("has-observation");
+
+        // Limpieza del teléfono para el link
+        const cleanPhone = (item.phone || "").replace(/\D/g, "");
+        const fullPhone = cleanPhone ? `${item.code || '57'}${cleanPhone}` : "";
+        const waLink = fullPhone ? `https://wa.me/${fullPhone}?text=${encodeURIComponent(MESSAGE_WA)}` : "#";
+
+        tr.innerHTML = `
+            <td><b>${item.supplier}</b></td>
+            <td>${item.brand || '-'}</td>
+            <td>${item.tipo || '-'}</td>
+            <td style="text-align: center;">
+                <input type="checkbox" class="custom-checkbox" ${itemData.stf15 ? 'checked' : ''} 
+                       onchange="updateItemState('${item.id}', 'stf15', this.checked)">
+            </td>
+            <td style="text-align: center;">
+                <input type="checkbox" class="custom-checkbox" ${itemData.stf51 ? 'checked' : ''} 
+                       onchange="updateItemState('${item.id}', 'stf51', this.checked)">
+            </td>
+            <td>
+                <input type="text" class="obs-input" value="${itemData.obs || ''}" placeholder="Escriba novedad..."
+                       onchange="updateItemState('${item.id}', 'obs', this.value)">
+            </td>
+            <td>
+                ${fullPhone ? `<a href="${waLink}" target="_blank" class="btn-whatsapp">💬 WhatsApp</a>` : '<span style="color:#a0aec0; font-size:0.8rem;">Sin tel.</span>'}
+            </td>
+            <td>
+                <button class="btn-danger" style="padding: 4px 8px; font-size: 0.75rem;" onclick="deleteSupplier('${item.id}')">🗑️</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    updateKPIs();
+}
+
+function updateKPIs() {
+    const suppliers = appState.master[currentDay] || [];
+    const dayState = getWeekDayState(currentWeek, currentDay);
+    
+    let requestedCount = 0;
+    let obsCount = 0;
+
+    suppliers.forEach(item => {
+        const itemData = dayState[item.id] || { stf15: false, stf51: false, obs: "" };
+        if (itemData.stf15 || itemData.stf51) {
+            requestedCount++;
+        }
+        if (itemData.obs && itemData.obs.trim() !== "") {
+            obsCount++;
+        }
+    });
+
+    const total = suppliers.length;
+    const percentage = total > 0 ? Math.round((requestedCount / total) * 100) : 0;
+
+    document.getElementById("kpiProgress").innerText = `${requestedCount} / ${total} (${percentage}%)`;
+    document.getElementById("kpiObs").innerText = obsCount;
+}
+
+function toggleFilterObs() {
+    onlyObsFilter = !onlyObsFilter;
+    const btn = document.getElementById("btnFilterObs");
+    btn.classList.toggle("filter-active", onlyObsFilter);
+    btn.innerText = onlyObsFilter ? "📋 Ver Todos los Proveedores" : "🔍 Ver solo con Observaciones";
+    renderTable();
+}
+
+// Exportación / Importación
+function exportData() {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState));
+    const dlAnchorElem = document.createElement('a');
+    dlAnchorElem.setAttribute("href", dataStr);
+    dlAnchorElem.setAttribute("download", `frecuencia_pedidos_semana_${currentWeek}.json`);
+    dlAnchorElem.click();
+}
+
+function importData(event) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const imported = JSON.parse(e.target.result);
+            if (imported.master && imported.history) {
+                appState = imported;
+                saveLocalStorage();
+                renderTable();
+                alert("¡Trabajo e histórico importados con éxito!");
+            } else {
+                alert("El archivo no tiene el formato correcto.");
+            }
+        } catch (err) {
+            alert("Error al leer el archivo JSON.");
+        }
+    };
+    reader.readAsText(event.target.files[0]);
+}
+
+// Modal CRUD
+function openModal() {
+    document.getElementById("newDay").value = currentDay;
+    document.getElementById("addModal").style.display = "flex";
+}
+
+function closeModal() {
+    document.getElementById("addModal").style.display = "none";
+}
+
+function saveNewSupplier() {
+    const day = document.getElementById("newDay").value;
+    const supplier = document.getElementById("newSupplier").value.trim();
+    const brand = document.getElementById("newBrand").value.trim();
+    const tipo = document.getElementById("newTipo").value.trim();
+    const code = document.getElementById("newCode").value.trim();
+    const phone = document.getElementById("newPhone").value.trim();
+
+    if (!supplier) {
+        alert("El nombre del proveedor es obligatorio");
+        return;
+    }
+
+    const newId = "NEW_" + Date.now();
+    appState.master[day].push({
+        id: newId,
+        supplier,
+        brand,
+        tipo,
+        code,
+        phone
+    });
+
+    saveLocalStorage();
+    closeModal();
+    if (day === currentDay) renderTable();
+    else setDay(day);
+}
+
+function deleteSupplier(id) {
+    if (confirm("¿Estás seguro de que deseas eliminar este proveedor?")) {
+        appState.master[currentDay] = appState.master[currentDay].filter(item => item.id !== id);
+        saveLocalStorage();
+        renderTable();
+    }
+}
+</script>
+</body>
+</html>
