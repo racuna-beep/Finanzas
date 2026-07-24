@@ -160,6 +160,30 @@
             border-color: var(--danger-soft);
         }
 
+        .supplier-cell {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .copy-btn {
+            background: none;
+            border: none;
+            padding: 2px 5px;
+            font-size: 0.8rem;
+            color: var(--ink-muted);
+            cursor: pointer;
+            line-height: 1;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .copy-btn:hover {
+            background-color: var(--primary-soft);
+            color: var(--primary);
+            box-shadow: none;
+        }
+
         .tabs-days {
             display: flex;
             gap: 4px;
@@ -1450,6 +1474,42 @@ function updateSearchDayHints(searchTerm, filterStore, filterStatus) {
 // algo como "<img src=x onerror=...>" y ejecutar JavaScript en la pantalla
 // de todo el equipo (XSS). Se aplica a todo texto que viene de un input,
 // nunca a etiquetas HTML que arma el propio código.
+// Copia el nombre del proveedor al portapapeles. Se busca por id (no se pasa
+// el texto crudo en el HTML) para que nombres con comillas u otros caracteres
+// especiales nunca puedan romper el atributo onclick.
+function copySupplierName(itemId, btnEl) {
+    const item = (appState.master[currentDay] || []).find(i => i.id === itemId);
+    if (!item) return;
+    const name = item.supplier || "";
+
+    const showFeedback = () => {
+        if (!btnEl) return;
+        btnEl.innerText = "✅";
+        setTimeout(() => { btnEl.innerText = "📋"; }, 1200);
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(name).then(showFeedback).catch(() => {
+            copyFallback(name);
+            showFeedback();
+        });
+    } else {
+        copyFallback(name);
+        showFeedback();
+    }
+}
+
+function copyFallback(text) {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); } catch (e) { /* silencioso */ }
+    document.body.removeChild(ta);
+}
+
 function escapeHtml(str) {
     return String(str == null ? "" : str)
         .replace(/&/g, "&amp;")
@@ -1517,7 +1577,12 @@ function renderTable() {
             : `<span class="store-na" title="No aplica para STF 51">—</span>`;
 
         tr.innerHTML = `
-            <td><b>${escapeHtml(item.supplier)}</b></td>
+            <td>
+                <div class="supplier-cell">
+                    <b>${escapeHtml(item.supplier)}</b>
+                    <button type="button" class="copy-btn" onclick="copySupplierName('${item.id}', this)" title="Copiar nombre del proveedor">📋</button>
+                </div>
+            </td>
             <td>${escapeHtml(item.brand || '-')}</td>
             <td>${escapeHtml(item.tipo || '-')}</td>
             <td class="checkbox-cell" style="text-align: center;">${stf15Cell}</td>
@@ -1611,6 +1676,7 @@ function toggleFilterObs() {
 
 // Modal CRUD
 let editingItemId = null;
+let editingOriginalItem = null;
 let phoneWasAutofilled = false;
 
 function setDayCheckboxes(selectedDays, disabled) {
@@ -1622,6 +1688,7 @@ function setDayCheckboxes(selectedDays, disabled) {
 
 function openModal() {
     editingItemId = null;
+    editingOriginalItem = null;
     document.getElementById("modalTitle").innerText = "Agregar Nuevo Proveedor";
     document.getElementById("saveSupplierBtn").innerText = "Guardar";
     document.getElementById("dayLockedHint").style.display = "none";
@@ -1645,6 +1712,12 @@ function openEditModal(itemId) {
     if (!item) return;
 
     editingItemId = itemId;
+    // Foto de cómo estaba el proveedor al abrir el modal. Al guardar, solo se
+    // envían al servidor los campos que de verdad cambiaron respecto a esta
+    // foto — así, si el teléfono (u otro campo) se actualizó directo en el
+    // Sheet mientras tanto, editar otra cosa aquí nunca lo pisa con el dato viejo.
+    editingOriginalItem = JSON.parse(JSON.stringify(item));
+
     document.getElementById("modalTitle").innerText = "Editar Proveedor";
     document.getElementById("saveSupplierBtn").innerText = "Guardar cambios";
 
@@ -1672,6 +1745,7 @@ function closeModal() {
     document.querySelectorAll(".day-checkbox").forEach(cb => cb.disabled = false);
     document.getElementById("dayLockedHint").style.display = "none";
     editingItemId = null;
+    editingOriginalItem = null;
 }
 
 // Si el nombre escrito coincide con un proveedor que ya existe en otro día,
@@ -1736,12 +1810,25 @@ async function saveNewSupplier() {
 
     try {
         if (editingItemId) {
-            // Editar in-place: mismo id, mismo día -> conserva el historial ya guardado
-            const res = await jsonpRequest({
-                action: "upsertProveedor", id: editingItemId, day: currentDay,
-                supplier, brand, tipo, code, phone, stf15: storeSTF15, stf51: storeSTF51
-            });
-            if (res.error) throw new Error(res.error);
+            // Solo se envían al servidor los campos que de verdad cambiaron
+            // respecto a como estaba el proveedor al abrir el modal — así una
+            // edición nunca pisa un campo (ej. teléfono) que alguien más haya
+            // actualizado directo en el Sheet mientras el modal estaba abierto.
+            const original = editingOriginalItem || {};
+            const originalStores = getItemStores(original);
+            const changes = [];
+            if ((original.supplier || "") !== supplier) changes.push(["supplier", supplier]);
+            if ((original.brand || "") !== brand) changes.push(["brand", brand]);
+            if ((original.tipo || "") !== tipo) changes.push(["tipo", tipo]);
+            if ((original.code || "57") !== code) changes.push(["code", code]);
+            if ((original.phone || "") !== phone) changes.push(["phone", phone]);
+            if (originalStores.includes("STF15") !== storeSTF15) changes.push(["stf15", storeSTF15]);
+            if (originalStores.includes("STF51") !== storeSTF51) changes.push(["stf51", storeSTF51]);
+
+            for (const [field, value] of changes) {
+                const res = await jsonpRequest({ action: "updateProveedorField", id: editingItemId, day: currentDay, field, value });
+                if (res.error) throw new Error(res.error);
+            }
 
             const list = appState.master[currentDay] || [];
             const item = list.find(i => i.id === editingItemId);
