@@ -4,74 +4,128 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Frecuencia de Pedidos 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #ff6b00;
-            --primary-hover: #e05d00;
-            --bg-light: #f8f9fa;
-            --text-dark: #2c3e50;
-            --border-color: #e2e8f0;
-            --obs-bg: #fff3e0;
-            --obs-border: #ffe0b2;
+            --primary: #4F46E5;
+            --primary-hover: #4338CA;
+            --primary-soft: #EEF2FF;
+            --ink: #0F172A;
+            --ink-muted: #64748B;
+            --paper: #F8FAFC;
+            --surface: #FFFFFF;
+            --border-color: #E2E8F0;
+            --alert-bg: #FEF3C7;
+            --alert-border: #F59E0B;
+            --success: #059669;
+            --danger: #DC2626;
+            --danger-soft: #FEE2E2;
+            --shadow-sm: 0 1px 2px rgba(15,23,42,0.06);
+            --shadow-md: 0 4px 12px rgba(15,23,42,0.08);
+            --font-display: 'Inter', 'Segoe UI', sans-serif;
+            --font-body: 'Inter', 'Segoe UI', sans-serif;
+            --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+
+            /* Alias de compatibilidad con reglas existentes */
+            --bg-light: var(--paper);
+            --text-dark: var(--ink);
+            --obs-bg: var(--alert-bg);
+            --obs-border: var(--alert-border);
         }
 
         * {
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: var(--font-body);
             margin: 0;
             padding: 0;
         }
 
         body {
-            background-color: var(--bg-light);
-            color: var(--text-dark);
+            background-color: var(--paper);
+            color: var(--ink);
             padding: 20px;
         }
 
         header {
-            background-color: #ffffff;
-            border-bottom: 4px solid var(--primary);
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            background-color: var(--surface);
+            border: 1px solid var(--border-color);
+            padding: 18px 24px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
             margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        h1 {
+            font-family: var(--font-display);
+            font-weight: 700;
+            color: var(--ink);
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: -0.02em;
+        }
+
+        /* Cada fila del header agrupa sus elementos como un bloque:
+           si no cabe todo, se envuelve la fila completa, no un botón suelto. */
+        .header-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 12px;
+            width: 100%;
         }
 
-        h1 {
-            color: var(--primary);
-            font-size: 1.6rem;
+        .header-status, .week-control, .header-actions {
             display: flex;
             align-items: center;
             gap: 10px;
-        }
-
-        .controls {
-            display: flex;
-            gap: 10px;
-            align-items: center;
             flex-wrap: wrap;
+        }
+
+        .header-actions {
+            margin-left: auto;
+        }
+
+        @media (max-width: 640px) {
+            .header-row { justify-content: flex-start; }
+            .header-actions {
+                margin-left: 0;
+                width: 100%;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            .header-actions button { flex: none; width: 100%; }
         }
 
         select, button, input {
             padding: 8px 12px;
             border: 1px solid var(--border-color);
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 0.9rem;
             outline: none;
+            font-family: var(--font-body);
+        }
+
+        select:focus-visible, button:focus-visible, input:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 1px;
         }
 
         button {
             background-color: var(--primary);
             color: white;
-            border: none;
+            border: 1px solid var(--primary);
             cursor: pointer;
             font-weight: 600;
-            transition: background 0.2s;
+            transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
             display: inline-flex;
             align-items: center;
             gap: 5px;
@@ -79,83 +133,248 @@
 
         button:hover {
             background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+            box-shadow: var(--shadow-sm);
         }
 
+        /* Acciones secundarias: ghost, no compiten visualmente con la acción primaria */
         button.btn-secondary {
-            background-color: #6c757d;
+            background-color: var(--surface);
+            color: var(--ink);
+            border-color: var(--border-color);
         }
         button.btn-secondary:hover {
-            background-color: #5a6268;
+            background-color: var(--paper);
+            border-color: #CBD5E1;
+            color: var(--ink);
+            box-shadow: var(--shadow-sm);
         }
 
         button.btn-danger {
-            background-color: #dc3545;
+            background-color: transparent;
+            color: var(--danger);
+            border-color: transparent;
         }
         button.btn-danger:hover {
-            background-color: #bd2130;
+            background-color: var(--danger-soft);
+            border-color: var(--danger-soft);
         }
 
         .tabs-days {
             display: flex;
-            gap: 5px;
-            margin-bottom: 15px;
-            border-bottom: 2px solid var(--border-color);
-            background-color: #fff;
-            padding: 5px 5px 0 5px;
-            border-radius: 8px 8px 0 0;
+            gap: 4px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--surface);
+            padding: 4px 8px 0 8px;
+            border-radius: 12px 12px 0 0;
+            box-shadow: var(--shadow-sm);
         }
 
         .tab-btn {
-            padding: 10px 20px;
+            flex: 1;
+            padding: 12px 14px;
             border: none;
             background: none;
-            font-weight: bold;
-            color: #6c757d;
-            border-bottom: 3px solid transparent;
+            font-weight: 600;
+            color: var(--ink-muted);
+            border-bottom: 2px solid transparent;
             border-radius: 0;
             cursor: pointer;
+            transition: color 0.15s, border-color 0.15s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-btn:hover {
+            color: var(--ink);
         }
 
         .tab-btn.active {
             color: var(--primary);
             border-bottom-color: var(--primary);
-            background-color: #fff5ed;
+        }
+
+        .tab-badge {
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--ink-muted);
+            background-color: var(--paper);
+            padding: 2px 7px;
+            border-radius: 10px;
+        }
+
+        .tab-btn.active .tab-badge {
+            color: var(--primary);
+            background-color: var(--primary-soft);
+        }
+
+        @media (max-width: 640px) {
+            .tabs-days { overflow-x: auto; }
+            .tab-btn { flex: none; }
+            .tab-badge { display: none; }
         }
 
         .kpi-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 12px;
         }
 
         .kpi-card {
-            background-color: white;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid var(--primary);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            background-color: var(--surface);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .kpi-icon {
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background-color: var(--primary-soft);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .kpi-icon-amber {
+            background-color: var(--alert-bg);
         }
 
         .kpi-title {
-            font-size: 0.85rem;
-            color: #6c757d;
+            font-size: 0.78rem;
+            color: var(--ink-muted);
             text-transform: uppercase;
+            letter-spacing: 0.04em;
             font-weight: 600;
         }
 
         .kpi-value {
-            font-size: 1.4rem;
-            font-weight: bold;
-            color: var(--text-dark);
-            margin-top: 5px;
+            font-family: var(--font-mono);
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--ink);
+            margin-top: 3px;
+        }
+
+        .toolbar-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 220px;
+            max-width: 360px;
+        }
+
+        .toolbar-filters {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-filters select {
+            font-weight: 500;
+            color: var(--ink);
+            cursor: pointer;
+        }
+
+        @media (max-width: 640px) {
+            .toolbar-row { flex-direction: column; align-items: stretch; }
+            .search-input { max-width: none; }
+            .toolbar-filters { justify-content: space-between; }
+            .toolbar-filters select { flex: 1; }
+        }
+
+        .search-hints {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: -6px 0 14px 0;
+            padding: 10px 12px;
+            background-color: var(--primary-soft);
+            border: 1px solid #C7D2FE;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            color: var(--ink);
+        }
+
+        .search-hints .hint-label {
+            font-weight: 600;
+            color: var(--ink-muted);
+        }
+
+        .day-hint-chip {
+            background-color: var(--surface);
+            border: 1px solid var(--border-color);
+            color: var(--ink);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .day-hint-chip:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .day-hint-chip.is-current {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .filter-chip {
+            background-color: var(--surface);
+            color: var(--ink);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .filter-chip:hover {
+            background-color: var(--primary-soft);
+            border-color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .filter-chip.filter-active {
+            background-color: var(--primary) !important;
+            color: white;
+            border-color: var(--primary);
+            box-shadow: none;
         }
 
         .table-container {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            overflow-x: auto;
+            background-color: var(--surface);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            overflow: auto;
+            max-height: 68vh;
         }
 
         table {
@@ -166,10 +385,16 @@
         }
 
         th {
-            background-color: #f1f5f9;
-            color: var(--text-dark);
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background-color: #F8FAFC;
+            color: var(--ink);
             padding: 12px;
             font-weight: 600;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
             border-bottom: 2px solid var(--border-color);
             white-space: nowrap;
         }
@@ -181,17 +406,28 @@
         }
 
         tr.has-observation {
-            background-color: var(--obs-bg) !important;
+            background-color: var(--alert-bg) !important;
         }
 
         tr:hover {
-            background-color: #f8fafc;
+            background-color: #F8FAFC;
+        }
+
+        .empty-state td {
+            text-align: center;
+            padding: 48px 20px;
+            color: var(--ink-muted);
+            font-size: 0.95rem;
         }
 
         /* Styling Custom Checkbox */
+        .checkbox-cell {
+            padding: 4px 12px !important;
+        }
+
         .custom-checkbox {
-            width: 18px;
-            height: 18px;
+            width: 24px;
+            height: 24px;
             accent-color: var(--primary);
             cursor: pointer;
         }
@@ -201,11 +437,12 @@
             padding: 6px;
             border: 1px solid var(--border-color);
             border-radius: 4px;
+            font-family: var(--font-body);
         }
 
         tr.has-observation .obs-input {
-            border-color: #f59e0b;
-            background-color: #fff8f0;
+            border-color: var(--alert-border);
+            background-color: #FFFBEB;
         }
 
         .btn-whatsapp {
@@ -229,23 +466,26 @@
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(15,23,42,0.5);
             justify-content: center;
             align-items: center;
             z-index: 1000;
         }
 
         .modal-content {
-            background: white;
+            background: var(--surface);
             padding: 25px;
-            border-radius: 8px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
             width: 400px;
             max-width: 90%;
         }
 
         .modal-content h3 {
+            font-family: var(--font-display);
+            font-weight: 700;
             margin-bottom: 15px;
-            color: var(--primary);
+            color: var(--ink);
         }
 
         .form-group {
@@ -256,6 +496,7 @@
             display: block;
             font-size: 0.85rem;
             margin-bottom: 4px;
+            color: var(--ink-muted);
         }
 
         .form-group input, .form-group select {
@@ -269,48 +510,166 @@
             margin-top: 15px;
         }
 
-        .filter-active {
-            background-color: #e05d00 !important;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        .store-options {
+            display: flex;
+            gap: 12px 16px;
+            flex-wrap: wrap;
+        }
+
+        .store-options label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--ink);
+            margin-bottom: 0;
+        }
+
+        .store-options input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--primary);
+        }
+
+        .match-hint {
+            display: block;
+            margin-top: 5px;
+            font-size: 0.8rem;
+            color: var(--success);
+            background-color: #D1FAE5;
+            padding: 6px 8px;
+            border-radius: 4px;
+        }
+
+        .store-na {
+            color: var(--ink-muted);
+            font-size: 0.9rem;
+        }
+
+        .user-badge {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--ink);
+            padding: 5px 12px;
+            background-color: var(--paper);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+        }
+
+        .sync-status {
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 20px;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            background-color: var(--paper);
+            border: 1px solid var(--border-color);
+            color: var(--ink-muted);
+            transition: color 0.15s;
+        }
+
+        .sync-status.sync-ok {
+            color: var(--success);
+        }
+
+        .sync-status.sync-loading {
+            color: #B45309;
+        }
+
+        .sync-status.sync-error {
+            color: var(--danger);
+        }
+
+        .obs-meta {
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            color: var(--ink-muted);
+            margin-top: 3px;
+        }
+
+        /* Responsive: columnas secundarias se ocultan en pantallas angostas
+           para que Proveedor + checkboxes + observaciones sigan siendo el foco */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            header { padding: 14px; }
+            h1 { font-size: 1.25rem; }
+            th:nth-child(2), td:nth-child(2),
+            th:nth-child(3), td:nth-child(3) {
+                display: none;
+            }
+            .table-container { max-height: 72vh; }
         }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>📦 Frecuencia de Pedidos - 2026</h1>
-    <div class="controls">
-        <label for="weekSelect"><b>Semana:</b></label>
-        <select id="weekSelect" onchange="changeWeek()"></select>
-
-        <button onclick="openModal()">➕ Añadir Proveedor</button>
-        <button class="btn-secondary" onclick="exportData()">💾 Exportar Trabajo</button>
-        <button class="btn-secondary" onclick="document.getElementById('importFile').click()">📂 Importar Trabajo</button>
-        <input type="file" id="importFile" style="display:none" onchange="importData(event)" accept=".json">
+    <div class="header-row">
+        <h1>📦 Frecuencia de Pedidos - 2026</h1>
+        <div class="header-status">
+            <span id="userBadge" class="user-badge">👤</span>
+            <span id="syncStatus" class="sync-status sync-loading">🔄 Conectando...</span>
+        </div>
+    </div>
+    <div class="header-row">
+        <div class="week-control">
+            <label for="weekSelect"><b>Semana:</b></label>
+            <select id="weekSelect" onchange="changeWeek()"></select>
+        </div>
+        <div class="header-actions">
+            <button onclick="openModal()">➕ Añadir Proveedor</button>
+            <button class="btn-secondary" onclick="loadWeekFromServer(currentWeek)">🔄 Actualizar ahora</button>
+        </div>
     </div>
 </header>
 
 <div class="tabs-days">
-    <button class="tab-btn active" onclick="setDay('LUNES')">Lunes</button>
-    <button class="tab-btn" onclick="setDay('MARTES')">Martes</button>
-    <button class="tab-btn" onclick="setDay('MIERCOLES')">Miércoles</button>
-    <button class="tab-btn" onclick="setDay('JUEVES')">Jueves</button>
-    <button class="tab-btn" onclick="setDay('VIERNES')">Viernes</button>
+    <button class="tab-btn active" data-day="LUNES" onclick="setDay('LUNES')">Lunes <span class="tab-badge" id="badge-LUNES">0/0</span></button>
+    <button class="tab-btn" data-day="MARTES" onclick="setDay('MARTES')">Martes <span class="tab-badge" id="badge-MARTES">0/0</span></button>
+    <button class="tab-btn" data-day="MIERCOLES" onclick="setDay('MIERCOLES')">Miércoles <span class="tab-badge" id="badge-MIERCOLES">0/0</span></button>
+    <button class="tab-btn" data-day="JUEVES" onclick="setDay('JUEVES')">Jueves <span class="tab-badge" id="badge-JUEVES">0/0</span></button>
+    <button class="tab-btn" data-day="VIERNES" onclick="setDay('VIERNES')">Viernes <span class="tab-badge" id="badge-VIERNES">0/0</span></button>
 </div>
 
 <div class="kpi-container">
     <div class="kpi-card">
-        <div class="kpi-title">Avance Solicitudes (Día)</div>
-        <div class="kpi-value" id="kpiProgress">0 / 0 (0%)</div>
+        <div class="kpi-icon">📦</div>
+        <div>
+            <div class="kpi-title">Avance Solicitudes (Día)</div>
+            <div class="kpi-value" id="kpiProgress">0 / 0 (0%)</div>
+        </div>
     </div>
     <div class="kpi-card">
-        <div class="kpi-title">Total Novedades / Observaciones</div>
-        <div class="kpi-value" id="kpiObs">0</div>
-    </div>
-    <div class="kpi-card" style="display: flex; align-items: center;">
-        <button id="btnFilterObs" onclick="toggleFilterObs()" style="width: 100%;">🔍 Ver solo con Observaciones</button>
+        <div class="kpi-icon kpi-icon-amber">📝</div>
+        <div>
+            <div class="kpi-title">Total Novedades / Observaciones</div>
+            <div class="kpi-value" id="kpiObs">0</div>
+        </div>
     </div>
 </div>
+
+<div class="toolbar-row">
+    <input type="text" id="searchInput" class="search-input" placeholder="🔍 Buscar proveedor o marca..." oninput="renderTable()">
+    <div class="toolbar-filters">
+        <select id="filterStore" onchange="renderTable()">
+            <option value="">Todas las tiendas</option>
+            <option value="STF15">STF 15</option>
+            <option value="STF51">STF 51</option>
+        </select>
+        <select id="filterStatus" onchange="renderTable()">
+            <option value="">Todos los estados</option>
+            <option value="pending">Pendientes</option>
+            <option value="done">Solicitados</option>
+        </select>
+        <button id="btnFilterObs" class="filter-chip" onclick="toggleFilterObs()">📝 Con Observaciones</button>
+    </div>
+</div>
+
+<div id="searchDayHints" class="search-hints" style="display:none;"></div>
 
 <div class="table-container">
     <table>
@@ -332,23 +691,27 @@
     </table>
 </div>
 
-<!-- Modal Añadir Proveedor -->
+<!-- Modal Añadir/Editar Proveedor -->
 <div class="modal" id="addModal">
     <div class="modal-content">
-        <h3>Agregar Nuevo Proveedor</h3>
+        <h3 id="modalTitle">Agregar Nuevo Proveedor</h3>
         <div class="form-group">
-            <label>Día de Compra</label>
-            <select id="newDay">
-                <option value="LUNES">LUNES</option>
-                <option value="MARTES">MARTES</option>
-                <option value="MIERCOLES">MIÉRCOLES</option>
-                <option value="JUEVES">JUEVES</option>
-                <option value="VIERNES">VIERNES</option>
-            </select>
+            <label>Día(s) de Compra</label>
+            <div class="store-options" id="dayCheckboxGroup">
+                <label><input type="checkbox" class="day-checkbox" value="LUNES"> Lunes</label>
+                <label><input type="checkbox" class="day-checkbox" value="MARTES"> Martes</label>
+                <label><input type="checkbox" class="day-checkbox" value="MIERCOLES"> Miércoles</label>
+                <label><input type="checkbox" class="day-checkbox" value="JUEVES"> Jueves</label>
+                <label><input type="checkbox" class="day-checkbox" value="VIERNES"> Viernes</label>
+            </div>
+            <span id="dayLockedHint" class="match-hint" style="display:none; background-color: var(--paper); color: var(--ink-muted);">
+                Al editar solo se modifica el día actual — para agregarlo a otros días, créalo también ahí.
+            </span>
         </div>
         <div class="form-group">
             <label>Proveedor (Supplier)</label>
-            <input type="text" id="newSupplier" required>
+            <input type="text" id="newSupplier" required oninput="checkExistingSupplier()">
+            <span id="supplierMatchHint" class="match-hint" style="display:none;"></span>
         </div>
         <div class="form-group">
             <label>Marca (Brand)</label>
@@ -359,16 +722,23 @@
             <input type="text" id="newTipo" value="Pareto">
         </div>
         <div class="form-group">
+            <label>Tienda(s) que aplican</label>
+            <div class="store-options">
+                <label><input type="checkbox" id="storeSTF15" checked> STF 15</label>
+                <label><input type="checkbox" id="storeSTF51" checked> STF 51</label>
+            </div>
+        </div>
+        <div class="form-group">
             <label>Código País (Ej: 57)</label>
             <input type="text" id="newCode" value="57">
         </div>
         <div class="form-group">
             <label>Número WhatsApp</label>
-            <input type="text" id="newPhone" placeholder="300 0000000">
+            <input type="text" id="newPhone" placeholder="300 0000000" oninput="phoneWasAutofilled=false">
         </div>
         <div class="modal-actions">
             <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
-            <button onclick="saveNewSupplier()">Guardar</button>
+            <button id="saveSupplierBtn" onclick="saveNewSupplier()">Guardar</button>
         </div>
     </div>
 </div>
@@ -729,17 +1099,59 @@ const initialMasterData = {
 
 const MESSAGE_WA = "Hola, ¿cómo estás? 😊 Quería preguntarte cómo van los despachos de las órdenes de compra pendientes que tenemos actualmente. Estuve revisando y veo que aún hay algunos pedidos por entregar. ¿Me cuentas por favor cómo avanzan y si tienes alguna novedad? Muchas gracias";
 
+// ============ CONFIGURACIÓN ============
+// Pega aquí la URL /exec de tu implementación de Apps Script (ver Codigo_Apps_Script.gs)
+const CONFIG = {
+    SCRIPT_URL: "https://script.google.com/macros/s/AKfycbwCC_ouqEPLuClI3SKf4X_Y5I92DBVpVTkFvcPYgISdQf3O8rL5zn0Nc2b26NiO9oCB/exec",
+    POLL_INTERVAL_MS: 8000,
+    MASTER_POLL_INTERVAL_MS: 20000
+};
+
 let currentWeek = 1;
 let currentDay = "LUNES";
 let onlyObsFilter = false;
-let appState = {};
+let appState = { master: {}, history: {} };
+let currentUser = localStorage.getItem("frecuencia_user_name") || "";
+
+// Semana calendario actual (semana 1 = primeros 7 días del año), tope en 52.
+function getCurrentWeekNumber() {
+    const now = new Date();
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+    const diffDays = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24));
+    return Math.min(52, Math.floor(diffDays / 7) + 1);
+}
 
 // Inicialización de la App
-window.onload = function() {
+window.onload = async function() {
     setupWeekSelector();
-    loadLocalStorage();
+    currentWeek = getCurrentWeekNumber();
+    document.getElementById("weekSelect").value = currentWeek;
+    ensureUserName();
+    await loadMasterData();
     renderTable();
+    loadWeekFromServer(currentWeek);
+    setInterval(() => loadWeekFromServer(currentWeek, true), CONFIG.POLL_INTERVAL_MS);
+    setInterval(() => loadMasterFromServer(true), CONFIG.MASTER_POLL_INTERVAL_MS);
+    // Si la app queda abierta y cambia la semana calendario (p.ej. de domingo a lunes),
+    // avisa en vez de saltar solo y perder de vista lo que estabas mirando.
+    setInterval(checkWeekRollover, 60 * 60 * 1000);
 };
+
+function checkWeekRollover() {
+    const realWeek = getCurrentWeekNumber();
+    if (String(realWeek) !== String(currentWeek)) {
+        setSyncStatus(`📅 Ya inició la Semana ${realWeek}`, "sync-loading");
+    }
+}
+
+function ensureUserName() {
+    if (!currentUser) {
+        currentUser = (prompt("¿Cuál es tu nombre? (para identificar tus cambios en el equipo)", "") || "Usuario").trim() || "Usuario";
+        localStorage.setItem("frecuencia_user_name", currentUser);
+    }
+    const badge = document.getElementById("userBadge");
+    if (badge) badge.innerText = "👤 " + currentUser;
+}
 
 function setupWeekSelector() {
     const select = document.getElementById("weekSelect");
@@ -751,33 +1163,183 @@ function setupWeekSelector() {
     }
 }
 
-function loadLocalStorage() {
-    const saved = localStorage.getItem("frecuencia_pedidos_2026_db");
-    if (saved) {
-        appState = JSON.parse(saved);
-    } else {
-        // Clonar datos maestra
-        appState = {
-            master: JSON.parse(JSON.stringify(initialMasterData)),
-            history: {} // Guardará semana -> día -> item_id -> {stf15, stf51, obs}
-        };
-        saveLocalStorage();
+// ---- Proveedores (datos maestros): ahora viven en el Google Sheet ----
+// Compartido para todo el equipo, igual que el checklist semanal.
+let phoneLookup = {};
+
+function normalizeSupplierName(name) {
+    return (name || "").trim().toUpperCase().replace(/\s+/g, " ");
+}
+
+// Cuando un mismo proveedor compra en varios días, no siempre se cargó
+// el WhatsApp en todas las entradas. Este índice busca, para cada
+// proveedor, el primer número válido que exista en cualquier día.
+function buildPhoneLookup() {
+    phoneLookup = {};
+    Object.keys(appState.master).forEach(day => {
+        (appState.master[day] || []).forEach(item => {
+            const key = normalizeSupplierName(item.supplier);
+            const hasPhone = item.phone && item.phone.trim() !== "";
+            if (key && hasPhone && !phoneLookup[key]) {
+                phoneLookup[key] = { phone: item.phone.trim(), code: item.code || "57" };
+            }
+        });
+    });
+}
+
+// Teléfono "efectivo" de un proveedor: el propio si existe,
+// o el de otra entrada del mismo proveedor en otro día.
+function getEffectivePhone(item) {
+    if (item.phone && item.phone.trim() !== "") {
+        return { phone: item.phone.trim(), code: item.code || "57" };
+    }
+    return phoneLookup[normalizeSupplierName(item.supplier)] || null;
+}
+
+// Tiendas donde aplica el proveedor. Los proveedores existentes (sin este
+// campo) se consideran válidos para ambas tiendas, como funcionaba antes.
+function getItemStores(item) {
+    return (item.stores && item.stores.length) ? item.stores : ["STF15", "STF51"];
+}
+
+function totalMasterCount(master) {
+    return Object.values(master || {}).reduce((sum, arr) => sum + (arr ? arr.length : 0), 0);
+}
+
+// Carga inicial: trae el maestro del Google Sheet. Si el Sheet aún no se ha
+// "sembrado" (pestaña Proveedores vacía) o no hay conexión, usa como respaldo
+// la copia embebida en este HTML para que la app no se quede en blanco.
+async function loadMasterData() {
+    try {
+        setSyncStatus("🔄 Cargando proveedores...", "sync-loading");
+        const data = await jsonpRequest({ action: "getMaster" });
+        if (data.error) throw new Error(data.error);
+
+        if (totalMasterCount(data.master) === 0) {
+            appState.master = JSON.parse(JSON.stringify(initialMasterData));
+            setSyncStatus("⚠️ Proveedores del Sheet vacíos (usando copia local de respaldo)", "sync-error");
+        } else {
+            appState.master = data.master;
+        }
+    } catch (err) {
+        appState.master = JSON.parse(JSON.stringify(initialMasterData));
+        setSyncStatus("🔴 No se pudo cargar el Sheet (usando copia local de respaldo)", "sync-error");
+    }
+    buildPhoneLookup();
+}
+
+// Refresco periódico: recoge cambios hechos por el equipo o directamente en el Sheet.
+async function loadMasterFromServer(isPoll) {
+    try {
+        const data = await jsonpRequest({ action: "getMaster" });
+        if (data.error) throw new Error(data.error);
+        if (totalMasterCount(data.master) === 0) return; // evita vaciar la tabla si el Sheet aún no tiene nada
+
+        const modalOpen = document.getElementById("addModal").style.display === "flex";
+        if (isPoll && modalOpen) return; // no interrumpir mientras se edita/crea un proveedor
+
+        appState.master = data.master;
+        buildPhoneLookup();
+        renderTable();
+    } catch (err) {
+        // Silencioso en el poll — el badge de sincronización ya refleja el estado de conexión
     }
 }
 
-function saveLocalStorage() {
-    localStorage.setItem("frecuencia_pedidos_2026_db", JSON.stringify(appState));
+// ---- Estado semanal (checklist + observaciones): vive en Google Sheets ----
+function setSyncStatus(text, cls) {
+    const el = document.getElementById("syncStatus");
+    if (!el) return;
+    el.innerText = text;
+    el.className = "sync-status " + (cls || "");
+}
+
+let jsonpCounter = 0;
+function jsonpRequest(params) {
+    return new Promise((resolve, reject) => {
+        const callbackName = "jsonpCb_" + (jsonpCounter++) + "_" + Date.now();
+        const query = Object.entries(params)
+            .map(([k, v]) => encodeURIComponent(k) + "=" + encodeURIComponent(v))
+            .join("&");
+
+        const script = document.createElement("script");
+        const timeoutId = setTimeout(() => {
+            reject(new Error("Tiempo de espera agotado"));
+            cleanup();
+        }, 15000);
+
+        function cleanup() {
+            delete window[callbackName];
+            if (script.parentNode) script.parentNode.removeChild(script);
+            clearTimeout(timeoutId);
+        }
+
+        window[callbackName] = function(data) {
+            resolve(data);
+            cleanup();
+        };
+        script.onerror = function() {
+            reject(new Error("Error de red"));
+            cleanup();
+        };
+        script.src = `${CONFIG.SCRIPT_URL}?callback=${callbackName}&${query}`;
+        document.body.appendChild(script);
+    });
+}
+
+// Cambios que ya se ven en pantalla pero el servidor todavía no confirma.
+// Sin esto, un refresco automático que llega mientras el guardado está en
+// camino puede traer el dato viejo y "borrar" momentáneamente la marca.
+let pendingChanges = {};
+
+async function loadWeekFromServer(week, isPoll) {
+    if (!CONFIG.SCRIPT_URL || CONFIG.SCRIPT_URL.includes("PEGA_AQUI")) {
+        setSyncStatus("⚠️ Falta configurar la URL de Apps Script", "sync-error");
+        return;
+    }
+    try {
+        if (!isPoll) setSyncStatus("🔄 Cargando semana...", "sync-loading");
+        const data = await jsonpRequest({ action: "getState", week });
+        if (data.error) throw new Error(data.error);
+
+        // No pisar la tabla si el usuario está escribiendo una observación
+        const active = document.activeElement;
+        const isTypingObs = active && active.classList && active.classList.contains("obs-input");
+        if (isPoll && isTypingObs) return;
+
+        appState.history[week] = data.state || {};
+
+        // Reaplicar cambios locales aún no confirmados por el servidor,
+        // para que este mismo refresco no los revierta momentáneamente.
+        Object.keys(pendingChanges).forEach(key => {
+            const [pWeek, pDay, pItemId, pField] = key.split("|");
+            if (String(pWeek) !== String(week)) return;
+            if (!appState.history[week][pDay]) appState.history[week][pDay] = {};
+            if (!appState.history[week][pDay][pItemId]) {
+                appState.history[week][pDay][pItemId] = { stf15: false, stf51: false, obs: "" };
+            }
+            appState.history[week][pDay][pItemId][pField] = pendingChanges[key];
+        });
+
+        if (String(currentWeek) === String(week)) {
+            renderTable();
+        }
+        setSyncStatus("🟢 Sincronizado", "sync-ok");
+    } catch (err) {
+        setSyncStatus("🔴 Sin conexión con el servidor", "sync-error");
+    }
 }
 
 function changeWeek() {
     currentWeek = document.getElementById("weekSelect").value;
     renderTable();
+    loadWeekFromServer(currentWeek);
 }
 
 function setDay(day) {
     currentDay = day;
     document.querySelectorAll(".tab-btn").forEach(btn => {
-        btn.classList.toggle("active", btn.innerText.toUpperCase() === day || (day === "MIERCOLES" && btn.innerText.includes("Miércoles")));
+        btn.classList.toggle("active", btn.dataset.day === day);
     });
     renderTable();
 }
@@ -794,8 +1356,12 @@ function updateItemState(itemId, field, value) {
         dayState[itemId] = { stf15: false, stf51: false, obs: "" };
     }
     dayState[itemId][field] = value;
-    
-    saveLocalStorage();
+    dayState[itemId].updatedBy = currentUser;
+    dayState[itemId].updatedAt = new Date().toISOString();
+
+    const pendingKey = `${currentWeek}|${currentDay}|${itemId}|${field}`;
+    pendingChanges[pendingKey] = value;
+
     updateKPIs();
 
     // Actualizar estilo visual de la fila si tiene observación
@@ -804,6 +1370,93 @@ function updateItemState(itemId, field, value) {
         const hasObs = dayState[itemId].obs && dayState[itemId].obs.trim() !== "";
         tr.classList.toggle("has-observation", !!hasObs);
     }
+
+    setSyncStatus("💾 Guardando...", "sync-loading");
+    const supplierItem = (appState.master[currentDay] || []).find(i => i.id === itemId);
+    jsonpRequest({
+        action: "updateState",
+        week: currentWeek,
+        day: currentDay,
+        itemId,
+        field,
+        value,
+        user: currentUser,
+        supplierName: supplierItem ? supplierItem.supplier : ""
+    }).then(res => {
+        delete pendingChanges[pendingKey];
+        if (res && res.error) {
+            setSyncStatus("🔴 Error al guardar: " + res.error, "sync-error");
+        } else {
+            setSyncStatus("🟢 Sincronizado", "sync-ok");
+        }
+    }).catch(() => {
+        // Se quita de pendientes para no bloquear futuros refrescos; el
+        // indicador en rojo le avisa al usuario que puede reintentar.
+        delete pendingChanges[pendingKey];
+        setSyncStatus("🔴 No se pudo guardar (revisa tu conexión)", "sync-error");
+    });
+}
+
+// Busca el término en los 5 días (no solo el actual) y muestra en qué días
+// aparece el proveedor, con un chip para saltar directo a ese día.
+function updateSearchDayHints(searchTerm, filterStore, filterStatus) {
+    const box = document.getElementById("searchDayHints");
+    if (!box) return;
+
+    if (!searchTerm) {
+        box.style.display = "none";
+        box.innerHTML = "";
+        return;
+    }
+
+    const dayLabels = { LUNES: "Lunes", MARTES: "Martes", MIERCOLES: "Miércoles", JUEVES: "Jueves", VIERNES: "Viernes" };
+    const matches = [];
+
+    Object.keys(dayLabels).forEach(day => {
+        const list = appState.master[day] || [];
+        const dayState = getWeekDayState(currentWeek, day);
+        const count = list.filter(item => {
+            const haystack = `${item.supplier} ${item.brand || ""}`.toLowerCase();
+            if (!haystack.includes(searchTerm)) return false;
+            if (filterStore && !getItemStores(item).includes(filterStore)) return false;
+            if (filterStatus) {
+                const itemData = dayState[item.id] || { stf15: false, stf51: false };
+                const isDone = !!(itemData.stf15 || itemData.stf51);
+                if (filterStatus === "pending" && isDone) return false;
+                if (filterStatus === "done" && !isDone) return false;
+            }
+            return true;
+        }).length;
+        if (count > 0) matches.push({ day, count });
+    });
+
+    if (matches.length === 0) {
+        box.style.display = "flex";
+        box.innerHTML = `<span class="hint-label">🔎 Sin coincidencias para "${escapeHtml(searchTerm)}" con los filtros actuales</span>`;
+        return;
+    }
+
+    const chips = matches.map(m => {
+        const isCurrent = m.day === currentDay;
+        return `<span class="day-hint-chip${isCurrent ? ' is-current' : ''}" onclick="setDay('${m.day}')">${dayLabels[m.day]} (${m.count})</span>`;
+    }).join("");
+
+    box.style.display = "flex";
+    box.innerHTML = `<span class="hint-label">🔎 Aparece en:</span>${chips}`;
+}
+
+// Escapa HTML para que nombres de proveedor, observaciones, etc. nunca se
+// interpreten como etiquetas/código — sin esto, cualquiera podría escribir
+// algo como "<img src=x onerror=...>" y ejecutar JavaScript en la pantalla
+// de todo el equipo (XSS). Se aplica a todo texto que viene de un input,
+// nunca a etiquetas HTML que arma el propio código.
+function escapeHtml(str) {
+    return String(str == null ? "" : str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
 }
 
 function renderTable() {
@@ -812,51 +1465,115 @@ function renderTable() {
 
     const suppliers = appState.master[currentDay] || [];
     const dayState = getWeekDayState(currentWeek, currentDay);
+    let visibleCount = 0;
+
+    const searchTerm = (document.getElementById("searchInput")?.value || "").trim().toLowerCase();
+    const filterStore = document.getElementById("filterStore")?.value || "";
+    const filterStatus = document.getElementById("filterStatus")?.value || "";
+
+    updateSearchDayHints(searchTerm, filterStore, filterStatus);
 
     suppliers.forEach(item => {
         const itemData = dayState[item.id] || { stf15: false, stf51: false, obs: "" };
         const hasObs = itemData.obs && itemData.obs.trim() !== "";
 
+        if (searchTerm) {
+            const haystack = `${item.supplier} ${item.brand || ""}`.toLowerCase();
+            if (!haystack.includes(searchTerm)) return;
+        }
+
+        if (filterStore && !getItemStores(item).includes(filterStore)) {
+            return; // No aplica a la tienda seleccionada
+        }
+
+        const isDone = !!(itemData.stf15 || itemData.stf51);
+        if (filterStatus === "pending" && isDone) return;
+        if (filterStatus === "done" && !isDone) return;
+
         if (onlyObsFilter && !hasObs) {
             return; // Filtro de observaciones activo
         }
+        visibleCount++;
 
         const tr = document.createElement("tr");
         tr.id = `tr-${item.id}`;
         if (hasObs) tr.classList.add("has-observation");
 
-        // Limpieza del teléfono para el link
-        const cleanPhone = (item.phone || "").replace(/\D/g, "");
-        const fullPhone = cleanPhone ? `${item.code || '57'}${cleanPhone}` : "";
+        // Teléfono: el propio, o el de otra entrada del mismo proveedor en otro día
+        const effectivePhone = getEffectivePhone(item);
+        const cleanPhone = effectivePhone ? effectivePhone.phone.replace(/\D/g, "") : "";
+        const fullPhone = cleanPhone ? `${effectivePhone.code || '57'}${cleanPhone}` : "";
         const waLink = fullPhone ? `https://wa.me/${fullPhone}?text=${encodeURIComponent(MESSAGE_WA)}` : "#";
+        const phoneReused = effectivePhone && (!item.phone || item.phone.trim() === "");
+
+        const stores = getItemStores(item);
+        const stf15Cell = stores.includes("STF15")
+            ? `<input type="checkbox" class="custom-checkbox" ${itemData.stf15 ? 'checked' : ''}
+                       onchange="updateItemState('${item.id}', 'stf15', this.checked)">`
+            : `<span class="store-na" title="No aplica para STF 15">—</span>`;
+        const stf51Cell = stores.includes("STF51")
+            ? `<input type="checkbox" class="custom-checkbox" ${itemData.stf51 ? 'checked' : ''}
+                       onchange="updateItemState('${item.id}', 'stf51', this.checked)">`
+            : `<span class="store-na" title="No aplica para STF 51">—</span>`;
 
         tr.innerHTML = `
-            <td><b>${item.supplier}</b></td>
-            <td>${item.brand || '-'}</td>
-            <td>${item.tipo || '-'}</td>
-            <td style="text-align: center;">
-                <input type="checkbox" class="custom-checkbox" ${itemData.stf15 ? 'checked' : ''} 
-                       onchange="updateItemState('${item.id}', 'stf15', this.checked)">
-            </td>
-            <td style="text-align: center;">
-                <input type="checkbox" class="custom-checkbox" ${itemData.stf51 ? 'checked' : ''} 
-                       onchange="updateItemState('${item.id}', 'stf51', this.checked)">
-            </td>
+            <td><b>${escapeHtml(item.supplier)}</b></td>
+            <td>${escapeHtml(item.brand || '-')}</td>
+            <td>${escapeHtml(item.tipo || '-')}</td>
+            <td class="checkbox-cell" style="text-align: center;">${stf15Cell}</td>
+            <td class="checkbox-cell" style="text-align: center;">${stf51Cell}</td>
             <td>
-                <input type="text" class="obs-input" value="${itemData.obs || ''}" placeholder="Escriba novedad..."
+                <input type="text" class="obs-input" value="${escapeHtml(itemData.obs || '')}" placeholder="Escriba novedad..."
                        onchange="updateItemState('${item.id}', 'obs', this.value)">
+                ${itemData.updatedBy ? `<span class="obs-meta">✏️ ${escapeHtml(itemData.updatedBy)} · ${formatUpdatedAt(itemData.updatedAt)}</span>` : ''}
             </td>
             <td>
-                ${fullPhone ? `<a href="${waLink}" target="_blank" class="btn-whatsapp">💬 WhatsApp</a>` : '<span style="color:#a0aec0; font-size:0.8rem;">Sin tel.</span>'}
+                ${fullPhone ? `<a href="${waLink}" target="_blank" class="btn-whatsapp">💬 WhatsApp</a>${phoneReused ? '<span class="obs-meta">tel. de otro día</span>' : ''}` : '<span style="color:var(--ink-muted); font-size:0.8rem;">Sin tel.</span>'}
             </td>
             <td>
-                <button class="btn-danger" style="padding: 4px 8px; font-size: 0.75rem;" onclick="deleteSupplier('${item.id}')">🗑️</button>
+                <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.9rem;" onclick="openEditModal('${item.id}')" title="Editar proveedor">✏️</button>
+                <button class="btn-danger" style="padding: 4px 8px; font-size: 0.9rem;" onclick="deleteSupplier('${item.id}')" title="Eliminar proveedor">🗑️</button>
             </td>
         `;
         tbody.appendChild(tr);
     });
 
+    if (visibleCount === 0) {
+        const tr = document.createElement("tr");
+        tr.className = "empty-state";
+        const anyFilterActive = searchTerm || filterStore || filterStatus || onlyObsFilter;
+        const message = anyFilterActive
+            ? "Ningún proveedor coincide con los filtros aplicados. Prueba a limpiarlos."
+            : "No hay proveedores registrados para este día.";
+        tr.innerHTML = `<td colspan="8">📭 ${message}</td>`;
+        tbody.appendChild(tr);
+    }
+
     updateKPIs();
+}
+
+function formatUpdatedAt(isoString) {
+    if (!isoString) return "";
+    const d = new Date(isoString);
+    if (isNaN(d.getTime())) return "";
+    const hh = String(d.getHours()).padStart(2, "0");
+    const mm = String(d.getMinutes()).padStart(2, "0");
+    return `${d.getDate()}/${d.getMonth() + 1} ${hh}:${mm}`;
+}
+
+function updateDayTabBadges() {
+    const weekState = appState.history[currentWeek] || {};
+    ["LUNES", "MARTES", "MIERCOLES", "JUEVES", "VIERNES"].forEach(day => {
+        const suppliers = appState.master[day] || [];
+        const dayState = weekState[day] || {};
+        let done = 0;
+        suppliers.forEach(item => {
+            const d = dayState[item.id];
+            if (d && (d.stf15 || d.stf51)) done++;
+        });
+        const badge = document.getElementById(`badge-${day}`);
+        if (badge) badge.innerText = `${done}/${suppliers.length}`;
+    });
 }
 
 function updateKPIs() {
@@ -881,89 +1598,229 @@ function updateKPIs() {
 
     document.getElementById("kpiProgress").innerText = `${requestedCount} / ${total} (${percentage}%)`;
     document.getElementById("kpiObs").innerText = obsCount;
+    updateDayTabBadges();
 }
 
 function toggleFilterObs() {
     onlyObsFilter = !onlyObsFilter;
     const btn = document.getElementById("btnFilterObs");
     btn.classList.toggle("filter-active", onlyObsFilter);
-    btn.innerText = onlyObsFilter ? "📋 Ver Todos los Proveedores" : "🔍 Ver solo con Observaciones";
+    btn.innerText = onlyObsFilter ? "📋 Ver Todos" : "📝 Con Observaciones";
     renderTable();
 }
 
-// Exportación / Importación
-function exportData() {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState));
-    const dlAnchorElem = document.createElement('a');
-    dlAnchorElem.setAttribute("href", dataStr);
-    dlAnchorElem.setAttribute("download", `frecuencia_pedidos_semana_${currentWeek}.json`);
-    dlAnchorElem.click();
-}
-
-function importData(event) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const imported = JSON.parse(e.target.result);
-            if (imported.master && imported.history) {
-                appState = imported;
-                saveLocalStorage();
-                renderTable();
-                alert("¡Trabajo e histórico importados con éxito!");
-            } else {
-                alert("El archivo no tiene el formato correcto.");
-            }
-        } catch (err) {
-            alert("Error al leer el archivo JSON.");
-        }
-    };
-    reader.readAsText(event.target.files[0]);
-}
-
 // Modal CRUD
+let editingItemId = null;
+let phoneWasAutofilled = false;
+
+function setDayCheckboxes(selectedDays, disabled) {
+    document.querySelectorAll(".day-checkbox").forEach(cb => {
+        cb.checked = selectedDays.includes(cb.value);
+        cb.disabled = disabled;
+    });
+}
+
 function openModal() {
-    document.getElementById("newDay").value = currentDay;
+    editingItemId = null;
+    document.getElementById("modalTitle").innerText = "Agregar Nuevo Proveedor";
+    document.getElementById("saveSupplierBtn").innerText = "Guardar";
+    document.getElementById("dayLockedHint").style.display = "none";
+    setDayCheckboxes([currentDay], false);
+    document.getElementById("newSupplier").value = "";
+    document.getElementById("newBrand").value = "";
+    document.getElementById("newTipo").value = "Pareto";
+    document.getElementById("newCode").value = "57";
+    document.getElementById("newPhone").value = "";
+    document.getElementById("storeSTF15").checked = true;
+    document.getElementById("storeSTF51").checked = true;
+    document.getElementById("supplierMatchHint").style.display = "none";
+    phoneWasAutofilled = false;
+    document.getElementById("addModal").style.display = "flex";
+}
+
+// Abre el mismo modal pero precargado con los datos del proveedor,
+// para poder completar el WhatsApp (u otro dato) que le hizo falta al crearlo.
+function openEditModal(itemId) {
+    const item = (appState.master[currentDay] || []).find(i => i.id === itemId);
+    if (!item) return;
+
+    editingItemId = itemId;
+    document.getElementById("modalTitle").innerText = "Editar Proveedor";
+    document.getElementById("saveSupplierBtn").innerText = "Guardar cambios";
+
+    // El día no se puede editar aquí: el historial ya guardado quedó ligado a ese día.
+    setDayCheckboxes([currentDay], true);
+    document.getElementById("dayLockedHint").style.display = "block";
+
+    document.getElementById("newSupplier").value = item.supplier || "";
+    document.getElementById("newBrand").value = item.brand || "";
+    document.getElementById("newTipo").value = item.tipo || "";
+    document.getElementById("newCode").value = item.code || "57";
+    document.getElementById("newPhone").value = item.phone || "";
+
+    const stores = getItemStores(item);
+    document.getElementById("storeSTF15").checked = stores.includes("STF15");
+    document.getElementById("storeSTF51").checked = stores.includes("STF51");
+
+    document.getElementById("supplierMatchHint").style.display = "none";
+    phoneWasAutofilled = false;
     document.getElementById("addModal").style.display = "flex";
 }
 
 function closeModal() {
     document.getElementById("addModal").style.display = "none";
+    document.querySelectorAll(".day-checkbox").forEach(cb => cb.disabled = false);
+    document.getElementById("dayLockedHint").style.display = "none";
+    editingItemId = null;
 }
 
-function saveNewSupplier() {
-    const day = document.getElementById("newDay").value;
+// Si el nombre escrito coincide con un proveedor que ya existe en otro día,
+// se autocompleta su WhatsApp para no repetir el problema de números faltantes.
+function checkExistingSupplier() {
+    const nameInput = document.getElementById("newSupplier");
+    const hint = document.getElementById("supplierMatchHint");
+    const phoneField = document.getElementById("newPhone");
+    const codeField = document.getElementById("newCode");
+    const key = normalizeSupplierName(nameInput.value);
+
+    const match = key ? phoneLookup[key] : null;
+
+    if (match) {
+        if (!phoneField.value.trim() || phoneWasAutofilled) {
+            phoneField.value = match.phone;
+            codeField.value = match.code;
+            phoneWasAutofilled = true;
+        }
+        hint.innerText = `✅ Ya compras a este proveedor en otro día — WhatsApp autocompletado.`;
+        hint.style.display = "block";
+    } else {
+        // Si el número en pantalla lo pusimos nosotros (no el usuario) y ya no aplica, lo limpiamos
+        if (phoneWasAutofilled) {
+            phoneField.value = "";
+            phoneWasAutofilled = false;
+        }
+        hint.style.display = "none";
+    }
+}
+
+async function saveNewSupplier() {
+    const selectedDays = Array.from(document.querySelectorAll(".day-checkbox:checked")).map(cb => cb.value);
     const supplier = document.getElementById("newSupplier").value.trim();
     const brand = document.getElementById("newBrand").value.trim();
     const tipo = document.getElementById("newTipo").value.trim();
     const code = document.getElementById("newCode").value.trim();
     const phone = document.getElementById("newPhone").value.trim();
+    const storeSTF15 = document.getElementById("storeSTF15").checked;
+    const storeSTF51 = document.getElementById("storeSTF51").checked;
 
     if (!supplier) {
         alert("El nombre del proveedor es obligatorio");
         return;
     }
+    if (selectedDays.length === 0) {
+        alert("Selecciona al menos un día de compra");
+        return;
+    }
+    if (!storeSTF15 && !storeSTF51) {
+        alert("Selecciona al menos una tienda (STF 15 o STF 51)");
+        return;
+    }
 
-    const newId = "NEW_" + Date.now();
-    appState.master[day].push({
-        id: newId,
-        supplier,
-        brand,
-        tipo,
-        code,
-        phone
-    });
+    const stores = [];
+    if (storeSTF15) stores.push("STF15");
+    if (storeSTF51) stores.push("STF51");
 
-    saveLocalStorage();
-    closeModal();
-    if (day === currentDay) renderTable();
-    else setDay(day);
+    const saveBtn = document.getElementById("saveSupplierBtn");
+    saveBtn.disabled = true;
+    setSyncStatus("💾 Guardando proveedor...", "sync-loading");
+
+    try {
+        if (editingItemId) {
+            // Editar in-place: mismo id, mismo día -> conserva el historial ya guardado
+            const res = await jsonpRequest({
+                action: "upsertProveedor", id: editingItemId, day: currentDay,
+                supplier, brand, tipo, code, phone, stf15: storeSTF15, stf51: storeSTF51
+            });
+            if (res.error) throw new Error(res.error);
+
+            const list = appState.master[currentDay] || [];
+            const item = list.find(i => i.id === editingItemId);
+            if (item) {
+                item.supplier = supplier;
+                item.brand = brand;
+                item.tipo = tipo;
+                item.code = code;
+                item.phone = phone;
+                item.stores = stores;
+            }
+            buildPhoneLookup();
+            closeModal();
+            renderTable();
+        } else {
+            // Una entrada independiente por cada día marcado, mismos datos.
+            // Si un día falla (ej. corte de red a mitad de camino), seguimos con
+            // los demás en vez de abortar todo, y al final reportamos exactamente
+            // cuáles quedaron guardados y cuáles no — así nunca queda la duda de
+            // si el proveedor se creó a medias sin que el usuario se entere.
+            const dayLabels = { LUNES: "Lunes", MARTES: "Martes", MIERCOLES: "Miércoles", JUEVES: "Jueves", VIERNES: "Viernes" };
+            const succeeded = [];
+            const failed = [];
+
+            for (const day of selectedDays) {
+                try {
+                    const res = await jsonpRequest({
+                        action: "upsertProveedor", id: "", day,
+                        supplier, brand, tipo, code, phone, stf15: storeSTF15, stf51: storeSTF51
+                    });
+                    if (res.error) throw new Error(res.error);
+                    if (!appState.master[day]) appState.master[day] = [];
+                    appState.master[day].push({ id: res.id, supplier, brand, tipo, code, phone, stores });
+                    succeeded.push(day);
+                } catch (dayErr) {
+                    failed.push({ day, message: dayErr.message });
+                }
+            }
+
+            buildPhoneLookup();
+            closeModal();
+            if (selectedDays.includes(currentDay)) {
+                renderTable();
+            } else if (succeeded.length > 0) {
+                setDay(succeeded[0]);
+            }
+
+            if (failed.length > 0) {
+                const okText = succeeded.length ? `Se guardó en: ${succeeded.map(d => dayLabels[d]).join(', ')}.\n` : '';
+                const failText = `No se pudo guardar en: ${failed.map(f => dayLabels[f.day]).join(', ')}.\nVuelve a intentarlo solo para esos días.`;
+                alert(okText + failText);
+                setSyncStatus("🔴 Guardado parcial — revisa el aviso", "sync-error");
+                return;
+            }
+        }
+        setSyncStatus("🟢 Sincronizado", "sync-ok");
+    } catch (err) {
+        alert("No se pudo guardar el proveedor: " + err.message);
+        setSyncStatus("🔴 Error al guardar proveedor", "sync-error");
+    } finally {
+        saveBtn.disabled = false;
+    }
 }
 
-function deleteSupplier(id) {
-    if (confirm("¿Estás seguro de que deseas eliminar este proveedor?")) {
-        appState.master[currentDay] = appState.master[currentDay].filter(item => item.id !== id);
-        saveLocalStorage();
+async function deleteSupplier(id) {
+    if (!confirm("¿Eliminar este proveedor? Se borra para todo el equipo, no solo en tu navegador.")) return;
+
+    setSyncStatus("💾 Eliminando...", "sync-loading");
+    try {
+        const res = await jsonpRequest({ action: "deleteProveedor", id });
+        if (res.error) throw new Error(res.error);
+
+        appState.master[currentDay] = (appState.master[currentDay] || []).filter(item => item.id !== id);
+        buildPhoneLookup();
         renderTable();
+        setSyncStatus("🟢 Sincronizado", "sync-ok");
+    } catch (err) {
+        alert("No se pudo eliminar el proveedor: " + err.message);
+        setSyncStatus("🔴 Error al eliminar proveedor", "sync-error");
     }
 }
 </script>
