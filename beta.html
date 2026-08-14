@@ -603,8 +603,7 @@
     </div>
     <div id="plan-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px"></div>
     <div style="margin-bottom:20px">
-      <h3 style="font-size:13px;font-weight:700;color:#1e293b;margin:0 0 4px 0">🔄 Diagnóstico de Ruptura de Inventario</h3>
-      <p style="font-size:11px;color:#64748b;margin:0 0 12px 0">De los SKUs que el sistema marcaría en sobrestock/gestionar por su "Días de Inventario" original, cuáles son exceso real vs. cuáles son falsos positivos por un quiebre de stock ya recuperado (Ene-Jul, agosto excluido por ser mes parcial)</p>
+      <p style="font-size:11px;color:#64748b;margin:0 0 12px 0">"SKUs Sobrestock" y "Capital Inmovilizado" de arriba ya muestran solo el <b>sobrestock real</b> — se excluyeron los falsos positivos por ruptura de stock recuperada, y los casos sin dato suficiente se separan abajo en su propia sección.</p>
       <div id="plan-summary-ruptura" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px"></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
@@ -624,7 +623,7 @@
             <th style="padding:10px 12px;text-align:left;color:#64748b">Categoría / Subcategoría</th>
             <th style="padding:10px 12px;text-align:center;color:#64748b">Responsable</th>
             <th style="padding:10px 12px;text-align:right;color:#a78bfa;cursor:pointer;user-select:none" onclick="sortPlan('skus')" id="planh-skus">SKUs ↕</th>
-            <th style="padding:10px 12px;text-align:right;color:#f59e0b;cursor:pointer;user-select:none" onclick="sortPlan('inv_val')" id="planh-inv_val">Val. Inv ↕</th>
+            <th style="padding:10px 12px;text-align:right;color:#f59e0b;cursor:pointer;user-select:none" onclick="sortPlan('inv_val')" id="planh-inv_val">Val. Sobrestock ↕</th>
             <th style="padding:10px 12px;text-align:right;color:#64748b;cursor:pointer;user-select:none" onclick="sortPlan('dias')" id="planh-dias">Días Prom ↕</th>
             <th style="padding:10px 12px;text-align:right;color:#64748b;cursor:pointer;user-select:none" onclick="sortPlan('inv_actual')" id="planh-inv_actual">Inv. Actual ↕</th>
             <th style="padding:10px 12px;text-align:center;color:#64748b">Estado</th>
@@ -633,6 +632,35 @@
         </table>
       </div>
     </div>
+
+    <div style="margin-top:24px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;cursor:pointer" onclick="toggleEnRupturaSection()">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span id="icon-ruptura-section" style="font-size:11px;color:#2563eb">▶</span>
+          <h3 style="font-size:14px;font-weight:800;color:#2563eb;margin:0">⏳ En Ruptura — Pendiente de Confirmar <span id="cnt-enruptura-header" style="font-weight:600;color:#64748b;font-size:12px"></span></h3>
+        </div>
+        <button id="btn-plan-export-ruptura" onclick="event.stopPropagation();exportEnRupturaXLSX()" style="background:#2563eb;color:#fff;border:none;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600">⬇ Exportar</button>
+      </div>
+      <p style="font-size:11px;color:#64748b;margin:0 0 12px 0">Julio (último mes completo) en cero — no hay suficiente evidencia todavía para confirmar si es sobrestock real o ruptura sin resolver. No se cuentan como sobrestock confirmado ni se accionan como tal.</p>
+      <div id="plan-ruptura-body" style="display:none">
+        <div class="table-card">
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:13px">
+              <thead><tr style="background:#eff6ff;text-transform:uppercase;font-size:10px;letter-spacing:0.5px">
+                <th style="padding:10px 12px;text-align:left;color:#64748b">SKU · Producto</th>
+                <th style="padding:10px 12px;text-align:center;color:#64748b">Tienda</th>
+                <th style="padding:10px 12px;text-align:center;color:#64748b">Proveedor</th>
+                <th style="padding:10px 12px;text-align:right;color:#f59e0b">Val. Inv</th>
+                <th style="padding:10px 12px;text-align:right;color:#64748b">Inv. Actual</th>
+                <th style="padding:10px 12px;text-align:center;color:#64748b">Situación</th>
+              </tr></thead>
+              <tbody id="plan-ruptura-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
   <!-- SIN MOVIMIENTO -->
   <div class="tab-panel" id="panel-sinmovimiento">
@@ -2357,54 +2385,70 @@ function renderPlan(rows){
   if(planStore) planStore.innerHTML='<option value="">Todas las tiendas</option>'+stores.map(s=>`<option value="${s}" ${s===curStore?'selected':''}>${s}</option>`).join('');
   const sf=planStore?planStore.value:'';const rf=planResp?planResp.value:'';
   const sobre=rows.filter(r=>(r.estado==='sobrestock'||r.estado==='gestionar')&&(!sf||r.store===sf)&&(!rf||(RESPONSABLES[r.category]||'—')===rf));
-  if(planCnt) planCnt.textContent=sobre.length;
-  const totalVal=sobre.reduce((a,r)=>a+(r.inv_valorizado||0),0);
-  const totalInv=sobre.reduce((a,r)=>a+(r.inv_actual||0),0);
-  const validDias=sobre.filter(r=>r.dias_inv!=null&&r.dias_inv>0&&r.dias_inv<9999);
+
+  // ── Separación: Verdadero Sobrestock (accionable) vs En Ruptura (pendiente) ──
+  const verdadero=sobre.filter(r=>r.clasificacion_ruptura==='Sobrestock confirmado'||r.clasificacion_ruptura==='Sobrestock real (ajustado)');
+  const enRuptura=sobre.filter(r=>r.clasificacion_ruptura==='En ruptura - tiene stock, monitorear'||r.clasificacion_ruptura==='En ruptura - sin stock, reabasto urgente');
+
+  if(planCnt) planCnt.textContent=verdadero.length;
+  const totalVal=verdadero.reduce((a,r)=>a+(r.inv_valorizado||0),0);
+  const totalInv=verdadero.reduce((a,r)=>a+(r.inv_actual||0),0);
+  const validDias=verdadero.filter(r=>r.dias_inv!=null&&r.dias_inv>0&&r.dias_inv<9999);
   const diasProm=validDias.length?validDias.reduce((a,r)=>a+r.dias_inv,0)/validDias.length:0;
-  const gst=sobre.filter(r=>r.estado==='gestionar').length;
+  const gst=verdadero.filter(r=>r.estado==='gestionar').length;
   if(planSumEl) planSumEl.innerHTML=[
-    {label:'SKUs Sobrestock',val:sobre.length.toLocaleString('es-CO'),sub:((sobre.length/Math.max(rows.length,1))*100).toFixed(1)+'% del total',color:'#8b5cf6'},
-    {label:'Capital Inmovilizado',val:'$'+Math.round(totalVal).toLocaleString('es-CO'),sub:'Inv. valorizado sobrestock',color:'#f59e0b'},
+    {label:'SKUs Sobrestock',val:verdadero.length.toLocaleString('es-CO'),sub:((verdadero.length/Math.max(rows.length,1))*100).toFixed(1)+'% del total · sobrestock real',color:'#8b5cf6'},
+    {label:'Capital Inmovilizado',val:'$'+Math.round(totalVal).toLocaleString('es-CO'),sub:'Inv. valorizado — sobrestock real',color:'#f59e0b'},
     {label:'Días Prom.',val:diasProm>0?diasProm.toFixed(0):'—',sub:'días promedio cobertura',color:'#a78bfa'},
     {label:'⚠️ Riesgo Vencimiento',val:gst,sub:'supera vida útil',color:'#ef4444'},
-    {label:'Categorías Afectadas',val:new Set(sobre.map(r=>r.category)).size,sub:'con al menos 1 SKU',color:'#8b5cf6'},
+    {label:'Categorías Afectadas',val:new Set(verdadero.map(r=>r.category)).size,sub:'con al menos 1 SKU',color:'#8b5cf6'},
     {label:'Unidades en Exceso',val:Math.round(totalInv).toLocaleString('es-CO'),sub:'unidades sobrestock',color:'#64748b'},
   ].map(k=>`<div style="background:#ffffff;border:1px solid #1e2d3d;border-left:3px solid ${k.color};border-radius:10px;padding:14px 16px"><div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;margin-bottom:6px">${k.label}</div><div style="font-size:22px;font-weight:800;color:${k.color};line-height:1">${k.val}</div><div style="font-size:11px;color:#64748b;margin-top:4px">${k.sub}</div></div>`).join('');
 
-  // ── Bloque de diagnóstico de ruptura (4 categorías) ────────────────────────
+  // ── Bloque "En Ruptura" (pendiente de confirmar) — con su propio valorizado ──
   const planRupturaEl=document.getElementById('plan-summary-ruptura');
   if(planRupturaEl){
-    const universoOriginal=rows.filter(r=>r.clasificacion_ruptura && (!sf||r.store===sf)&&(!rf||(RESPONSABLES[r.category]||'—')===rf));
-    const cConfirmado=universoOriginal.filter(r=>r.clasificacion_ruptura==='Sobrestock confirmado').length;
-    const cAjustado=universoOriginal.filter(r=>r.clasificacion_ruptura==='Sobrestock real (ajustado)').length;
-    const cFalsoPos=universoOriginal.filter(r=>r.clasificacion_ruptura==='Falso positivo - Ruptura recuperada').length;
-    const cEnRupturaStock=universoOriginal.filter(r=>r.clasificacion_ruptura==='En ruptura - tiene stock, monitorear').length;
-    const cEnRupturaSinStock=universoOriginal.filter(r=>r.clasificacion_ruptura==='En ruptura - sin stock, reabasto urgente').length;
-    const cEnRuptura=cEnRupturaStock+cEnRupturaSinStock;
-    const verdaderoSobrestock=cConfirmado+cAjustado;
-    const totalOriginal=universoOriginal.length||1;
+    const cEnRupturaStock=enRuptura.filter(r=>r.clasificacion_ruptura==='En ruptura - tiene stock, monitorear').length;
+    const cEnRupturaSinStock=enRuptura.filter(r=>r.clasificacion_ruptura==='En ruptura - sin stock, reabasto urgente').length;
+    const valEnRuptura=enRuptura.reduce((a,r)=>a+(r.inv_valorizado||0),0);
     planRupturaEl.innerHTML=[
-      {label:'✅ Verdadero Sobrestock',val:verdaderoSobrestock.toLocaleString('es-CO'),sub:'Confirmado ('+cConfirmado+') + Ajustado ('+cAjustado+')',color:'#8b5cf6'},
-      {label:'🔄 Falso Positivo',val:cFalsoPos.toLocaleString('es-CO'),sub:'Ruptura recuperada — sacar del plan',color:'#059669'},
-      {label:'⏳ En Ruptura',val:cEnRuptura.toLocaleString('es-CO'),sub:'🚨 Sin stock hoy ('+cEnRupturaSinStock+') · 👀 Con stock, monitorear ('+cEnRupturaStock+')',color:'#2563eb'},
-      {label:'📊 % Falsos Positivos',val:((cFalsoPos/totalOriginal)*100).toFixed(1)+'%',sub:'del total marcado originalmente',color:'#f59e0b'},
+      {label:'⏳ SKUs En Ruptura',val:enRuptura.length.toLocaleString('es-CO'),sub:'🚨 Sin stock hoy ('+cEnRupturaSinStock+') · 👀 Con stock ('+cEnRupturaStock+')',color:'#2563eb'},
+      {label:'💰 Valorizado En Ruptura',val:'$'+Math.round(valEnRuptura).toLocaleString('es-CO'),sub:'inventario pendiente de confirmar',color:'#60a5fa'},
     ].map(k=>`<div style="background:#ffffff;border:1px solid #1e2d3d;border-left:3px solid ${k.color};border-radius:10px;padding:14px 16px"><div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;margin-bottom:6px">${k.label}</div><div style="font-size:22px;font-weight:800;color:${k.color};line-height:1">${k.val}</div><div style="font-size:11px;color:#64748b;margin-top:4px">${k.sub}</div></div>`).join('');
   }
-  const respMap={};sobre.forEach(r=>{const resp=RESPONSABLES[r.category]||'—';respMap[resp]=(respMap[resp]||0)+1;});
+  const cntEnRupturaHeader=document.getElementById('cnt-enruptura-header');
+  if(cntEnRupturaHeader) cntEnRupturaHeader.textContent=enRuptura.length?'('+enRuptura.length+' SKUs)':'';
+  const planRupturaTbody=document.getElementById('plan-ruptura-tbody');
+  if(planRupturaTbody){
+    const sortedEnRuptura=enRuptura.slice().sort((a,b)=>(b.inv_valorizado||0)-(a.inv_valorizado||0));
+    planRupturaTbody.innerHTML=sortedEnRuptura.length?sortedEnRuptura.map(r=>{
+      const sc2={'STF 15':'#3b82f6','STF 30':'#8b5cf6','STF 51':'#f59e0b','STF 82':'#10b981','STF 93':'#ec4899'}[r.store]||'#64748b';
+      const sinStock=r.clasificacion_ruptura==='En ruptura - sin stock, reabasto urgente';
+      const sitBadge=sinStock?'<span style="display:inline-block;padding:2px 9px;border-radius:10px;font-size:10px;font-weight:700;background:rgba(239,68,68,0.12);color:#dc2626">🚨 Sin stock</span>':'<span style="display:inline-block;padding:2px 9px;border-radius:10px;font-size:10px;font-weight:700;background:rgba(59,130,246,0.12);color:#2563eb">👀 Monitorear</span>';
+      return '<tr style="border-bottom:1px solid #f0ede8" class="hover-row">'+
+        '<td style="padding:8px 12px;font-size:12px"><span style="color:#6b7280">'+escH(r.sku||'')+'</span> <span style="font-weight:600">'+escH((r.product||'').slice(0,40))+'</span></td>'+
+        '<td style="padding:8px 12px;text-align:center"><span style="display:inline-block;padding:1px 8px;border-radius:6px;font-size:10px;font-weight:700;background:'+sc2+'22;color:'+sc2+'">'+(r.store||'')+'</span></td>'+
+        '<td style="padding:8px 12px;text-align:center;font-size:11px;color:#64748b">'+escH((r.supplier||'').slice(0,28))+'</td>'+
+        '<td style="padding:8px 12px;text-align:right;color:#f59e0b;font-weight:600;font-size:12px">'+(r.inv_valorizado!=null?'$'+Math.round(r.inv_valorizado).toLocaleString('es-CO'):'—')+'</td>'+
+        '<td style="padding:8px 12px;text-align:right;color:#6b7280;font-size:12px">'+(r.inv_actual!=null?fmt(r.inv_actual):'—')+'</td>'+
+        '<td style="padding:8px 12px;text-align:center">'+sitBadge+'</td></tr>';
+    }).join('') : '<tr><td colspan="6" style="padding:20px;text-align:center;color:#94a3b8">Sin SKUs en ruptura pendiente</td></tr>';
+  }
+
+  const respMap={};verdadero.forEach(r=>{const resp=RESPONSABLES[r.category]||'—';respMap[resp]=(respMap[resp]||0)+1;});
   const respEl=document.getElementById('plan-chart-resp');
   if(respEl){const ent=Object.entries(respMap).sort((a,b)=>b[1]-a[1]);const max=ent[0]?.[1]||1;
     respEl.innerHTML=ent.map(([resp,cnt])=>{const color=RESP_COLORS[resp]||'#64748b';const pct=(cnt/max*100).toFixed(1);
-      return`<div style="display:flex;align-items:center;gap:10px"><span style="min-width:50px;font-size:12px;font-weight:700;color:${color}">${resp}</span><div style="flex:1;height:22px;background:#f0ede8;border-radius:4px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${color};border-radius:4px;display:flex;align-items:center;padding-left:8px"><span style="font-size:11px;font-weight:700;color:#fff;white-space:nowrap">${cnt.toLocaleString('es-CO')} SKUs</span></div></div><span style="min-width:36px;font-size:11px;color:#64748b;text-align:right">${((cnt/Math.max(sobre.length,1))*100).toFixed(0)}%</span></div>`;
+      return`<div style="display:flex;align-items:center;gap:10px"><span style="min-width:50px;font-size:12px;font-weight:700;color:${color}">${resp}</span><div style="flex:1;height:22px;background:#f0ede8;border-radius:4px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${color};border-radius:4px;display:flex;align-items:center;padding-left:8px"><span style="font-size:11px;font-weight:700;color:#fff;white-space:nowrap">${cnt.toLocaleString('es-CO')} SKUs</span></div></div><span style="min-width:36px;font-size:11px;color:#64748b;text-align:right">${((cnt/Math.max(verdadero.length,1))*100).toFixed(0)}%</span></div>`;
     }).join('');}
-  const provMap={};sobre.forEach(r=>{const p=r.supplier||'(Sin prov.)';provMap[p]=(provMap[p]||0)+1;});
+  const provMap={};verdadero.forEach(r=>{const p=r.supplier||'(Sin prov.)';provMap[p]=(provMap[p]||0)+1;});
   const provEl=document.getElementById('plan-chart-prov');
   if(provEl){const ent=Object.entries(provMap).sort((a,b)=>b[1]-a[1]).slice(0,20);const max=ent[0]?.[1]||1;
     const colors=['#8b5cf6','#a78bfa','#c4b5fd','#7c3aed','#6d28d9','#5b21b6','#4c1d95','#7c3aed','#8b5cf6','#9333ea','#a855f7','#b366f5','#c084fc','#d8b4fe','#8b5cf6','#7c3aed','#6d28d9','#a78bfa','#c4b5fd','#8b5cf6'];
     provEl.innerHTML=ent.map(([prov,cnt],i)=>{const pct=(cnt/max*100).toFixed(1);const short=prov.length>28?prov.substring(0,26)+'…':prov;
       return`<div style="display:flex;align-items:center;gap:8px"><span style="min-width:160px;font-size:11px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${escH(prov)}">${escH(short)}</span><div style="flex:1;height:18px;background:#f0ede8;border-radius:3px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${colors[i%colors.length]};border-radius:3px;display:flex;align-items:center;padding-left:6px"><span style="font-size:10px;font-weight:700;color:#fff;white-space:nowrap">${cnt}</span></div></div></div>`;
     }).join('');}
-  const catMap={};sobre.forEach(r=>{
+  const catMap={};verdadero.forEach(r=>{
     const cat=r.category||'(Sin categoría)';const sub=r.sub_category||'(Sin subcategoría)';
     if(!catMap[cat]) catMap[cat]={skus:0,inv_val:0,inv_actual:0,diasSum:0,diasN:0,gestionar:0,subs:{}};
     const c=catMap[cat];c.skus++;c.inv_val+=r.inv_valorizado||0;c.inv_actual+=r.inv_actual||0;if(r.estado==='gestionar')c.gestionar++;
@@ -2474,14 +2518,37 @@ function renderPlan(rows){
 
 function exportPlanXLSX(){
   const sf=document.getElementById('plan-store')?.value||'';const rf=document.getElementById('plan-resp')?.value||'';
-  const sobre=lastRows.filter(r=>(r.estado==='sobrestock'||r.estado==='gestionar')&&(!sf||r.store===sf)&&(!rf||(RESPONSABLES[r.category]||'—')===rf)).sort((a,b)=>(b.dias_inv||0)-(a.dias_inv||0));
-  if(!sobre.length) return;
-  const wsData=[['Categoría','Subcategoría','Responsable','Tienda','Proveedor','Marca','SKU','Producto','Días Inv.','Inv. Actual','Val. Inv','Estado']];
-  sobre.forEach(r=>wsData.push([r.category||'',r.sub_category||'',RESPONSABLES[r.category]||'—',r.store||'',r.supplier||'',r.brand||'',r.sku||'',r.product||'',r.dias_inv!=null?+r.dias_inv.toFixed(1):'',r.inv_actual||'',r.inv_valorizado||'',r.estado||'']));
+  const sobre=lastRows.filter(r=>(r.estado==='sobrestock'||r.estado==='gestionar')&&(!sf||r.store===sf)&&(!rf||(RESPONSABLES[r.category]||'—')===rf));
+  const verdadero=sobre.filter(r=>r.clasificacion_ruptura==='Sobrestock confirmado'||r.clasificacion_ruptura==='Sobrestock real (ajustado)').sort((a,b)=>(b.dias_inv||0)-(a.dias_inv||0));
+  if(!verdadero.length) return;
+  const wsData=[['Categoría','Subcategoría','Responsable','Tienda','Proveedor','Marca','SKU','Producto','Días Inv.','Inv. Actual','Val. Inv','Estado','Diagnóstico Ruptura']];
+  verdadero.forEach(r=>wsData.push([r.category||'',r.sub_category||'',RESPONSABLES[r.category]||'—',r.store||'',r.supplier||'',r.brand||'',r.sku||'',r.product||'',r.dias_inv!=null?+r.dias_inv.toFixed(1):'',r.inv_actual||'',r.inv_valorizado||'',r.estado||'',r.clasificacion_ruptura||'']));
   const wb=XLSX.utils.book_new();const ws=XLSX.utils.aoa_to_sheet(wsData);
-  ws['!cols']=[20,20,12,10,25,18,12,35,10,12,16,12].map(w=>({wch:w}));
+  ws['!cols']=[20,20,12,10,25,18,12,35,10,12,16,12,26].map(w=>({wch:w}));
   XLSX.utils.book_append_sheet(wb,ws,'Plan de Ataque');
   XLSX.writeFile(wb,'plan_ataque_dias_inv_'+new Date().toISOString().slice(0,10)+'.xlsx');
+}
+
+function exportEnRupturaXLSX(){
+  const sf=document.getElementById('plan-store')?.value||'';const rf=document.getElementById('plan-resp')?.value||'';
+  const sobre=lastRows.filter(r=>(r.estado==='sobrestock'||r.estado==='gestionar')&&(!sf||r.store===sf)&&(!rf||(RESPONSABLES[r.category]||'—')===rf));
+  const enRuptura=sobre.filter(r=>r.clasificacion_ruptura==='En ruptura - tiene stock, monitorear'||r.clasificacion_ruptura==='En ruptura - sin stock, reabasto urgente').sort((a,b)=>(b.inv_valorizado||0)-(a.inv_valorizado||0));
+  if(!enRuptura.length) return;
+  const wsData=[['Categoría','Subcategoría','Responsable','Tienda','Proveedor','Marca','SKU','Producto','Días Inv. (original)','Inv. Actual','Val. Inv','Situación']];
+  enRuptura.forEach(r=>wsData.push([r.category||'',r.sub_category||'',RESPONSABLES[r.category]||'—',r.store||'',r.supplier||'',r.brand||'',r.sku||'',r.product||'',r.dias_inv!=null?+r.dias_inv.toFixed(1):'',r.inv_actual||'',r.inv_valorizado||'',r.clasificacion_ruptura||'']));
+  const wb=XLSX.utils.book_new();const ws=XLSX.utils.aoa_to_sheet(wsData);
+  ws['!cols']=[20,20,12,10,25,18,12,35,14,12,16,28].map(w=>({wch:w}));
+  XLSX.utils.book_append_sheet(wb,ws,'En Ruptura');
+  XLSX.writeFile(wb,'en_ruptura_pendiente_'+new Date().toISOString().slice(0,10)+'.xlsx');
+}
+
+function toggleEnRupturaSection(){
+  const body=document.getElementById('plan-ruptura-body');
+  const icon=document.getElementById('icon-ruptura-section');
+  if(!body) return;
+  const isHidden=body.style.display==='none';
+  body.style.display=isHidden?'block':'none';
+  if(icon) icon.textContent=isHidden?'▼':'▶';
 }
 
 
