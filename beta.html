@@ -695,7 +695,11 @@ function detectVentaColumns(rawRows) {
   if (!rawRows.length) return;
   const keys = Object.keys(rawRows[0]);
   const ORDER = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  const found = keys.filter(k => k.trim().toLowerCase().startsWith('venta '));
+  const found = keys.filter(k => {
+    const kk = k.trim().toLowerCase();
+    if (kk.startsWith('venta ')) return true; // ej. "Venta Enero"
+    return ORDER.some(m => kk === m.toLowerCase()); // ej. "Enero" (sin prefijo)
+  });
   found.sort((a, b) => {
     const ma = ORDER.findIndex(m => a.toLowerCase().includes(m.toLowerCase()));
     const mb = ORDER.findIndex(m => b.toLowerCase().includes(m.toLowerCase()));
