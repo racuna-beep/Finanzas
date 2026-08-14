@@ -602,6 +602,11 @@
       </div>
     </div>
     <div id="plan-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px"></div>
+    <div style="margin-bottom:20px">
+      <h3 style="font-size:13px;font-weight:700;color:#1e293b;margin:0 0 4px 0">🔄 Diagnóstico de Ruptura de Inventario</h3>
+      <p style="font-size:11px;color:#64748b;margin:0 0 12px 0">De los SKUs que el sistema marcaría en sobrestock/gestionar por su "Días de Inventario" original, cuáles son exceso real vs. cuáles son falsos positivos por un quiebre de stock ya recuperado (Ene-Jul, agosto excluido por ser mes parcial)</p>
+      <div id="plan-summary-ruptura" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px"></div>
+    </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
       <div style="background:#ffffff;border:1px solid #1e2d3d;border-radius:12px;padding:16px">
         <h3 style="font-size:13px;font-weight:700;color:#1e293b;margin:0 0 14px 0">📦 SKUs Sobrestock por Responsable</h3>
@@ -834,15 +839,38 @@ function normalise(raw, keyMap) {
   const diasFinal = (rupturaInfo.rupturaConfirmada && diasAjustado != null) ? diasAjustado : dias;
 
   const tieneVentas = ventas.some(v => v != null && v > 0);
-  let estado = 'normal';
-  if (!tieneVentas) {
-    estado = (inv != null && inv > 0) ? 'sin_movimiento' : 'nuevo';
-  } else if (diasFinal != null) {
-    if (diasFinal === 0 || (inv != null && inv === 0)) estado = 'sin_stock';
-    else if (diasFinal <= 3)                          estado = 'quiebre';
-    else if (vidaUtil != null && diasFinal > vidaUtil) estado = 'gestionar';
-    else if (diasFinal >= 60)                         estado = 'sobrestock';
-    else if (diasFinal >= 4)                          estado = 'bien';
+
+  // Clasifica el estado a partir de un valor de "días" dado — se usa tanto
+  // con el valor original (para saber si HABRÍA sido sobrestock) como con
+  // el ajustado (para el estado final que ve el resto del dashboard).
+  function clasificarEstado(diasVal) {
+    if (!tieneVentas) return (inv != null && inv > 0) ? 'sin_movimiento' : 'nuevo';
+    if (diasVal == null) return 'normal';
+    if (diasVal === 0 || (inv != null && inv === 0)) return 'sin_stock';
+    if (diasVal <= 3) return 'quiebre';
+    if (vidaUtil != null && diasVal > vidaUtil) return 'gestionar';
+    if (diasVal >= 60) return 'sobrestock';
+    if (diasVal >= 4) return 'bien';
+    return 'normal';
+  }
+
+  const estadoOriginal = clasificarEstado(dias);
+  const estado = clasificarEstado(diasFinal);
+
+  // ── CLASIFICACIÓN DE RUPTURA (4 categorías, igual que el análisis en Excel) ──
+  // Solo aplica a SKUs que el sistema HABRÍA marcado sobrestock/gestionar con
+  // el cálculo original (antes de ajustar por ruptura).
+  let clasificacionRuptura = null;
+  const eraSobrestockOriginal = (estadoOriginal === 'sobrestock' || estadoOriginal === 'gestionar');
+  if (eraSobrestockOriginal) {
+    if (rupturaInfo.enRupturaActual) {
+      clasificacionRuptura = 'En ruptura - sin dato suficiente';
+    } else if (rupturaInfo.rupturaConfirmada) {
+      const sigueSobrestock = (estado === 'sobrestock' || estado === 'gestionar');
+      clasificacionRuptura = sigueSobrestock ? 'Sobrestock real (ajustado)' : 'Falso positivo - Ruptura recuperada';
+    } else {
+      clasificacionRuptura = 'Sobrestock confirmado';
+    }
   }
 
   return {
@@ -863,6 +891,7 @@ function normalise(raw, keyMap) {
     dias_inv_ajustado: rupturaInfo.rupturaConfirmada ? Math.round(diasAjustado * 10) / 10 : null,
     ruptura_detectada: !!rupturaInfo.rupturaConfirmada,
     en_ruptura_actual: !!rupturaInfo.enRupturaActual,
+    clasificacion_ruptura: clasificacionRuptura,
     meses_recuperacion: rupturaInfo.rupturaConfirmada ? rupturaInfo.mesesRecuperacion : null,
     vida_util:     vidaUtil,
     prom_vta:      numFast(g('promedio de venta ytd')) ?? promVta,
@@ -2324,6 +2353,24 @@ function renderPlan(rows){
     {label:'Categorías Afectadas',val:new Set(sobre.map(r=>r.category)).size,sub:'con al menos 1 SKU',color:'#8b5cf6'},
     {label:'Unidades en Exceso',val:Math.round(totalInv).toLocaleString('es-CO'),sub:'unidades sobrestock',color:'#64748b'},
   ].map(k=>`<div style="background:#ffffff;border:1px solid #1e2d3d;border-left:3px solid ${k.color};border-radius:10px;padding:14px 16px"><div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;margin-bottom:6px">${k.label}</div><div style="font-size:22px;font-weight:800;color:${k.color};line-height:1">${k.val}</div><div style="font-size:11px;color:#64748b;margin-top:4px">${k.sub}</div></div>`).join('');
+
+  // ── Bloque de diagnóstico de ruptura (4 categorías) ────────────────────────
+  const planRupturaEl=document.getElementById('plan-summary-ruptura');
+  if(planRupturaEl){
+    const universoOriginal=rows.filter(r=>r.clasificacion_ruptura && (!sf||r.store===sf)&&(!rf||(RESPONSABLES[r.category]||'—')===rf));
+    const cConfirmado=universoOriginal.filter(r=>r.clasificacion_ruptura==='Sobrestock confirmado').length;
+    const cAjustado=universoOriginal.filter(r=>r.clasificacion_ruptura==='Sobrestock real (ajustado)').length;
+    const cFalsoPos=universoOriginal.filter(r=>r.clasificacion_ruptura==='Falso positivo - Ruptura recuperada').length;
+    const cEnRuptura=universoOriginal.filter(r=>r.clasificacion_ruptura==='En ruptura - sin dato suficiente').length;
+    const verdaderoSobrestock=cConfirmado+cAjustado;
+    const totalOriginal=universoOriginal.length||1;
+    planRupturaEl.innerHTML=[
+      {label:'✅ Verdadero Sobrestock',val:verdaderoSobrestock.toLocaleString('es-CO'),sub:'Confirmado ('+cConfirmado+') + Ajustado ('+cAjustado+')',color:'#8b5cf6',big:true},
+      {label:'🔄 Falso Positivo',val:cFalsoPos.toLocaleString('es-CO'),sub:'Ruptura recuperada — sacar del plan',color:'#059669'},
+      {label:'⏳ En Ruptura',val:cEnRuptura.toLocaleString('es-CO'),sub:'Sin dato suficiente para confirmar',color:'#2563eb'},
+      {label:'📊 % Falsos Positivos',val:((cFalsoPos/totalOriginal)*100).toFixed(1)+'%',sub:'del total marcado originalmente',color:'#f59e0b'},
+    ].map(k=>`<div style="background:#ffffff;border:1px solid #1e2d3d;border-left:3px solid ${k.color};border-radius:10px;padding:14px 16px${k.big?';grid-column:span 1' : ''}"><div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;margin-bottom:6px">${k.label}</div><div style="font-size:22px;font-weight:800;color:${k.color};line-height:1">${k.val}</div><div style="font-size:11px;color:#64748b;margin-top:4px">${k.sub}</div></div>`).join('');
+  }
   const respMap={};sobre.forEach(r=>{const resp=RESPONSABLES[r.category]||'—';respMap[resp]=(respMap[resp]||0)+1;});
   const respEl=document.getElementById('plan-chart-resp');
   if(respEl){const ent=Object.entries(respMap).sort((a,b)=>b[1]-a[1]);const max=ent[0]?.[1]||1;
