@@ -338,7 +338,7 @@
    CONFIGURACIÓN
    ============================================================ */
 const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbyj3jnMaV7auvbFVnceOIbdB2UoLqH6Qmr8gDXmdOsOFTYCXzvupXB19Rr_h2ReptYj/exec';
-const CACHE_KEY = 'fithub_sellout_cache_v2';
+const CACHE_KEY = 'fithub_sellout_cache_v3';
 const MESES = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
 let RAW = [];
@@ -358,19 +358,20 @@ function loadData(){
   const timeout = setTimeout(()=>{
     if(!done){
       done = true;
-      delete window[cb];
+      // No borramos window[cb]: si la respuesta llega tarde, que se
+      // ignore en silencio en vez de tronar con ReferenceError.
+      window[cb] = function(){ /* respuesta tardía ignorada */ };
       const cached = getCache();
       if(cached){ RAW = cached.records; setStatus('offline', cached.updated); onDataReady(); }
       else setStatus('error');
       hideSplash();
     }
-  }, 20000);
+  }, 45000);
 
   window[cb] = function(payload){
     if(done) return;
     done = true;
     clearTimeout(timeout);
-    delete window[cb];
     if(payload.error){
       const cached = getCache();
       if(cached){ RAW = cached.records; setStatus('offline', cached.updated); onDataReady(); }
@@ -378,7 +379,7 @@ function loadData(){
       hideSplash();
       return;
     }
-    RAW = payload.records || [];
+    RAW = expandRecords(payload);
     setCache({ records: RAW, updated: payload.updated });
     setStatus('live', payload.updated);
     onDataReady();
@@ -397,6 +398,31 @@ function loadData(){
     hideSplash();
   };
   document.body.appendChild(script);
+}
+
+// El backend envía registros comprimidos como arreglos + diccionarios
+// (para pesar menos). Aquí los expandimos de vuelta a objetos con
+// nombres de campo, para que el resto del código no tenga que cambiar.
+function expandRecords(payload){
+  const d = payload.dict || { categoria:[], marca:[], articulo:[], nombre:[], logistica:[], distrito:[] };
+  return (payload.records || []).map(r => ({
+    categoria: d.categoria[r[0]],
+    marca: d.marca[r[1]],
+    plu: r[2],
+    articulo: d.articulo[r[3]],
+    centro: r[4],
+    nombre: d.nombre[r[5]],
+    logistica: d.logistica[r[6]],
+    distrito: d.distrito[r[7]],
+    anio: r[8],
+    mes: r[9],
+    venta2026: r[10],
+    venta2025: r[11],
+    unidades2026: r[12],
+    unidades2025: r[13],
+    costo2026: r[14],
+    ventaIva2026: r[15]
+  }));
 }
 function getCache(){ try{ const r = localStorage.getItem(CACHE_KEY); return r ? JSON.parse(r) : null; }catch(e){ return null; } }
 function setCache(o){ try{ localStorage.setItem(CACHE_KEY, JSON.stringify(o)); }catch(e){} }
