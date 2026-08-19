@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sell Out YTD 2026 · Fithub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root{
+    --orange:#EA551D;
+    --orange-light:#F7A88A;
+    --forest:#33513E;
+    --forest-light:#5C7C68;
+    --cream:#F7F2E9;
+    --cream-dark:#EFE6D6;
+    --paper:#FFFDF9;
+    --ink:#2A2622;
+    --ink-soft:#6B6459;
+    --line:#E4DACB;
+    --red:#C0392B;
+    --green:#2F7A4F;
+    --shadow: 0 2px 10px rgba(42,38,34,0.06);
+    --shadow-lg: 0 10px 30px rgba(42,38,34,0.10);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--cream);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.serif{ font-family:'Fraunces',serif; }
+  .mono{ font-family:'IBM Plex Mono',monospace; }
+
+  .wrap{ max-width:1360px; margin:0 auto; padding:24px 20px 60px; }
+
+  /* HEADER */
+  header{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    flex-wrap:wrap; gap:16px; margin-bottom:22px;
+  }
+  header h1{ font-size:30px; font-weight:600; margin:0 0 4px; color:var(--forest); }
+  header p{ margin:0; color:var(--ink-soft); font-size:14px; }
+  .status-box{
+    display:flex; align-items:center; gap:10px;
+    background:var(--paper); border:1px solid var(--line); border-radius:12px;
+    padding:10px 16px; box-shadow:var(--shadow);
+  }
+  .dot{ width:9px; height:9px; border-radius:50%; background:var(--ink-soft); }
+  .dot.live{ background:var(--green); box-shadow:0 0 0 3px rgba(47,122,79,0.15); }
+  .dot.offline{ background:var(--red); box-shadow:0 0 0 3px rgba(192,57,43,0.15); }
+  .status-text{ font-size:12.5px; color:var(--ink-soft); line-height:1.3; }
+  .status-text b{ color:var(--ink); font-weight:600; }
+  button.refresh{
+    border:1px solid var(--line); background:var(--cream-dark); color:var(--forest);
+    font-family:'Inter',sans-serif; font-weight:600; font-size:12.5px;
+    padding:8px 12px; border-radius:9px; cursor:pointer; transition:.15s;
+  }
+  button.refresh:hover{ background:var(--forest); color:#fff; }
+
+  /* KPIs */
+  .kpi-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+    gap:14px; margin-bottom:22px;
+  }
+  .kpi{
+    background:var(--paper); border:1px solid var(--line); border-radius:14px;
+    padding:16px 18px; box-shadow:var(--shadow); position:relative; overflow:hidden;
+  }
+  .kpi::before{
+    content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--orange);
+  }
+  .kpi.forest::before{ background:var(--forest); }
+  .kpi-label{ font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); font-weight:600; margin-bottom:6px; }
+  .kpi-value{ font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:600; color:var(--ink); }
+  .kpi-sub{ font-size:12.5px; margin-top:4px; font-weight:600; }
+  .kpi-sub.up{ color:var(--green); }
+  .kpi-sub.down{ color:var(--red); }
+
+  /* FILTERS */
+  .filters{
+    background:var(--paper); border:1px solid var(--line); border-radius:14px;
+    padding:14px 16px; margin-bottom:20px; box-shadow:var(--shadow);
+    display:flex; flex-wrap:wrap; gap:14px; align-items:flex-end;
+  }
+  .filter-group{ display:flex; flex-direction:column; gap:6px; min-width:170px; flex:1; }
+  .filter-group label{ font-size:11px; font-weight:600; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em; }
+  .filter-group select, .filter-group input{
+    border:1px solid var(--line); border-radius:9px; padding:8px 10px;
+    font-family:'Inter',sans-serif; font-size:13px; background:var(--cream);
+    color:var(--ink);
+  }
+  .filter-group select[multiple]{ min-height:74px; }
+  .filters .clear-btn{
+    align-self:flex-end; border:1px solid var(--orange); color:var(--orange);
+    background:transparent; padding:8px 14px; border-radius:9px; font-weight:600;
+    font-size:12.5px; cursor:pointer; height:fit-content;
+  }
+  .filters .clear-btn:hover{ background:var(--orange); color:#fff; }
+
+  /* TABS */
+  .tabs{ display:flex; gap:6px; margin-bottom:18px; flex-wrap:wrap; }
+  .tab-btn{
+    border:1px solid var(--line); background:var(--paper); color:var(--ink-soft);
+    padding:10px 16px; border-radius:10px 10px 0 0; font-weight:600; font-size:13.5px;
+    cursor:pointer; font-family:'Inter',sans-serif;
+  }
+  .tab-btn.active{ background:var(--forest); color:#fff; border-color:var(--forest); }
+  .tab-panel{ display:none; }
+  .tab-panel.active{ display:block; }
+
+  .card{
+    background:var(--paper); border:1px solid var(--line); border-radius:14px;
+    padding:20px; margin-bottom:18px; box-shadow:var(--shadow);
+  }
+  .card h3{ margin:0 0 14px; font-size:17px; color:var(--forest); font-weight:600; }
+  .chart-box{ position:relative; height:320px; }
+
+  .grid-2{ display:grid; grid-template-columns:1.3fr 1fr; gap:18px; }
+  @media (max-width:900px){ .grid-2{ grid-template-columns:1fr; } }
+
+  table{ width:100%; border-collapse:collapse; font-size:13px; }
+  th{
+    text-align:left; padding:9px 10px; font-size:11px; text-transform:uppercase;
+    letter-spacing:.03em; color:var(--ink-soft); border-bottom:2px solid var(--line);
+    cursor:pointer; user-select:none; white-space:nowrap;
+  }
+  th:hover{ color:var(--orange); }
+  td{ padding:9px 10px; border-bottom:1px solid var(--line); vertical-align:middle; }
+  tr.group-row{ cursor:pointer; }
+  tr.group-row:hover{ background:var(--cream-dark); }
+  tr.child-row td:first-child{ padding-left:30px; color:var(--ink-soft); }
+  .num{ font-family:'IBM Plex Mono',monospace; text-align:right; white-space:nowrap; }
+  .pct-up{ color:var(--green); font-weight:600; }
+  .pct-down{ color:var(--red); font-weight:600; }
+  .caret{ display:inline-block; width:14px; transition:transform .15s; color:var(--orange); font-weight:700; }
+  .caret.open{ transform:rotate(90deg); }
+  .search-box{
+    border:1px solid var(--line); border-radius:9px; padding:8px 12px; font-size:13px;
+    width:100%; margin-bottom:12px; font-family:'Inter',sans-serif; background:var(--cream);
+  }
+  .badge{
+    display:inline-block; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:600;
+    background:var(--cream-dark); color:var(--forest);
+  }
+  .table-scroll{ max-height:520px; overflow-y:auto; }
+  .empty-note{ color:var(--ink-soft); font-size:13px; padding:20px; text-align:center; }
+  footer{ text-align:center; color:var(--ink-soft); font-size:12px; margin-top:30px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <h1>Sell Out YTD 2026</h1>
+      <p>Venta, unidades y comparativo 2026 vs 2025 · por distrito, logística, categoría y marca</p>
+    </div>
+    <div class="status-box">
+      <div class="dot" id="statusDot"></div>
+      <div class="status-text">
+        <div id="statusText">Conectando...</div>
+        <div>Última actualización: <b id="lastUpdate">—</b></div>
+      </div>
+      <button class="refresh" onclick="loadData(true)">↻ Actualizar</button>
+    </div>
+  </header>
+
+  <div class="kpi-grid" id="kpiGrid"></div>
+
+  <div class="filters">
+    <div class="filter-group">
+      <label>Categoría</label>
+      <select multiple id="fCategoria" onchange="applyFilters()"></select>
+    </div>
+    <div class="filter-group">
+      <label>Marca</label>
+      <select multiple id="fMarca" onchange="applyFilters()"></select>
+    </div>
+    <div class="filter-group">
+      <label>Distrito</label>
+      <select multiple id="fDistrito" onchange="applyFilters()"></select>
+    </div>
+    <div class="filter-group">
+      <label>Logística</label>
+      <select multiple id="fLogistica" onchange="applyFilters()"></select>
+    </div>
+    <div class="filter-group">
+      <label>Mes</label>
+      <select multiple id="fMes" onchange="applyFilters()"></select>
+    </div>
+    <button class="clear-btn" onclick="clearFilters()">Limpiar filtros</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="resumen" onclick="switchTab('resumen')">Resumen</button>
+    <button class="tab-btn" data-tab="distrito" onclick="switchTab('distrito')">Distritos</button>
+    <button class="tab-btn" data-tab="logistica" onclick="switchTab('logistica')">Logística</button>
+    <button class="tab-btn" data-tab="catmarca" onclick="switchTab('catmarca')">Categoría / Marca</button>
+    <button class="tab-btn" data-tab="sku" onclick="switchTab('sku')">Detalle SKU</button>
+  </div>
+
+  <!-- RESUMEN -->
+  <div class="tab-panel active" id="panel-resumen">
+    <div class="card">
+      <h3>Evolución mensual — Venta 2026 vs 2025</h3>
+      <div class="chart-box"><canvas id="chartMensualVenta"></canvas></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Unidades por mes — 2026 vs 2025</h3>
+        <div class="chart-box"><canvas id="chartMensualUnidades"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Participación de venta por Logística</h3>
+        <div class="chart-box"><canvas id="chartLogisticaDonut"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DISTRITO -->
+  <div class="tab-panel" id="panel-distrito">
+    <div class="card">
+      <h3>Venta 2026 por Distrito</h3>
+      <div class="chart-box"><canvas id="chartDistrito"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Detalle por Distrito <span class="badge">clic en fila para ver centros</span></h3>
+      <div class="table-scroll">
+        <table id="tblDistrito">
+          <thead><tr>
+            <th></th>
+            <th data-sort="label">Distrito</th>
+            <th data-sort="venta2026" class="num">Venta 2026</th>
+            <th data-sort="venta2025" class="num">Venta 2025</th>
+            <th data-sort="varVentaPct" class="num">Var %</th>
+            <th data-sort="unidades2026" class="num">Unid. 2026</th>
+            <th data-sort="unidades2025" class="num">Unid. 2025</th>
+            <th data-sort="varUnidPct" class="num">Var % Unid</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOGISTICA -->
+  <div class="tab-panel" id="panel-logistica">
+    <div class="card">
+      <h3>Venta 2026 por tipo de Logística</h3>
+      <div class="chart-box"><canvas id="chartLogisticaBar"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Detalle por Logística <span class="badge">clic en fila para ver categorías</span></h3>
+      <div class="table-scroll">
+        <table id="tblLogistica">
+          <thead><tr>
+            <th></th>
+            <th data-sort="label">Logística</th>
+            <th data-sort="venta2026" class="num">Venta 2026</th>
+            <th data-sort="venta2025" class="num">Venta 2025</th>
+            <th data-sort="varVentaPct" class="num">Var %</th>
+            <th data-sort="unidades2026" class="num">Unid. 2026</th>
+            <th data-sort="unidades2025" class="num">Unid. 2025</th>
+            <th data-sort="varUnidPct" class="num">Var % Unid</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- CATEGORIA / MARCA -->
+  <div class="tab-panel" id="panel-catmarca">
+    <div class="card">
+      <h3>Top Categorías por Venta 2026</h3>
+      <div class="chart-box"><canvas id="chartCategoria"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Categoría → Marca → Artículo <span class="badge">drill-down de 2 niveles</span></h3>
+      <div class="table-scroll">
+        <table id="tblCategoria">
+          <thead><tr>
+            <th></th>
+            <th data-sort="label">Categoría / Marca / Artículo</th>
+            <th data-sort="venta2026" class="num">Venta 2026</th>
+            <th data-sort="venta2025" class="num">Venta 2025</th>
+            <th data-sort="varVentaPct" class="num">Var %</th>
+            <th data-sort="unidades2026" class="num">Unid. 2026</th>
+            <th data-sort="unidades2025" class="num">Unid. 2025</th>
+            <th data-sort="varUnidPct" class="num">Var % Unid</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SKU DETAIL -->
+  <div class="tab-panel" id="panel-sku">
+    <div class="card">
+      <input class="search-box" id="skuSearch" placeholder="Buscar por artículo, PLU, centro o marca..." oninput="renderSkuTable()">
+      <div class="table-scroll">
+        <table id="tblSku">
+          <thead><tr>
+            <th data-sort="articulo">Artículo</th>
+            <th data-sort="marca">Marca</th>
+            <th data-sort="categoria">Categoría</th>
+            <th data-sort="centroLabel">Centro</th>
+            <th data-sort="venta2026" class="num">Venta 2026</th>
+            <th data-sort="venta2025" class="num">Venta 2025</th>
+            <th data-sort="varVentaPct" class="num">Var %</th>
+            <th data-sort="unidades2026" class="num">Unid. 2026</th>
+            <th data-sort="unidades2025" class="num">Unid. 2025</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <footer>Fithub · Dashboard Sell Out YTD · datos vía Google Sheets (Apps Script)</footer>
+</div>
+
+<script>
+/* ============================================================
+   CONFIGURACIÓN
+   ============================================================ */
+// Reemplaza esta URL por la de tu Web App de Apps Script una vez
+// despliegues Code.gs (Implementar > Nueva implementación > Aplicación web).
+const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbx2s4-rpinWG-IYMwOVMq7ewLtwcIBkcMxUPklApMTOuMvHrx11ujz9U4H1nMbTmN5N/exec';
+const CACHE_KEY = 'fithub_sellout_cache_v1';
+
+const MESES = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+let RAW = [];            // registros crudos (SKU+Centro+Mes) desde el backend
+let FILTERED = [];       // luego de aplicar filtros globales
+let openGroups = { distrito:{}, logistica:{}, categoria:{}, marca:{} };
+let sortState = {};
+let charts = {};
+
+/* ============================================================
+   CARGA DE DATOS (JSONP con fallback a caché local)
+   ============================================================ */
+function loadData(forceRefresh){
+  setStatus('loading');
+  const cb = 'cb_' + Date.now();
+  let done = false;
+
+  const timeout = setTimeout(()=>{
+    if(!done){
+      done = true;
+      delete window[cb];
+      const cached = getCache();
+      if(cached){
+        RAW = cached.records;
+        setStatus('offline', cached.updated, true);
+        onDataReady();
+      } else {
+        setStatus('error');
+      }
+    }
+  }, 12000);
+
+  window[cb] = function(payload){
+    if(done) return;
+    done = true;
+    clearTimeout(timeout);
+    delete window[cb];
+    if(payload.error){
+      console.error('Error backend:', payload.error);
+      const cached = getCache();
+      if(cached){ RAW = cached.records; setStatus('offline', cached.updated, true); onDataReady(); }
+      else setStatus('error');
+      return;
+    }
+    RAW = payload.records || [];
+    setCache({ records: RAW, updated: payload.updated });
+    setStatus('live', payload.updated);
+    onDataReady();
+  };
+
+  const script = document.createElement('script');
+  script.src = SHEETS_API_URL + (SHEETS_API_URL.indexOf('?')>-1 ? '&' : '?') + 'callback=' + cb + '&t=' + Date.now();
+  script.onerror = function(){
+    if(done) return;
+    done = true;
+    clearTimeout(timeout);
+    const cached = getCache();
+    if(cached){ RAW = cached.records; setStatus('offline', cached.updated, true); onDataReady(); }
+    else setStatus('error');
+  };
+  document.body.appendChild(script);
+}
+
+function getCache(){
+  try{
+    const raw = localStorage.getItem(CACHE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  }catch(e){ return null; }
+}
+function setCache(obj){
+  try{ localStorage.setItem(CACHE_KEY, JSON.stringify(obj)); }catch(e){}
+}
+
+function setStatus(state, updated, isCache){
+  const dot = document.getElementById('statusDot');
+  const text = document.getElementById('statusText');
+  const lu = document.getElementById('lastUpdate');
+  dot.className = 'dot';
+  if(state==='loading'){ text.textContent = 'Conectando...'; }
+  else if(state==='live'){ dot.classList.add('live'); text.textContent = 'Conectado en vivo'; }
+  else if(state==='offline'){ dot.classList.add('offline'); text.textContent = 'Sin conexión — mostrando caché local'; }
+  else if(state==='error'){ dot.classList.add('offline'); text.textContent = 'No se pudo conectar. Configura SHEETS_API_URL.'; }
+  if(updated){ lu.textContent = new Date(updated).toLocaleString('es-CO'); }
+}
+
+/* ============================================================
+   ARRANQUE
+   ============================================================ */
+function onDataReady(){
+  populateFilterOptions();
+  applyFilters();
+}
+
+function populateFilterOptions(){
+  fillSelect('fCategoria', uniqueSorted(RAW.map(r=>r.categoria)));
+  fillSelect('fMarca', uniqueSorted(RAW.map(r=>r.marca)));
+  fillSelect('fDistrito', uniqueSorted(RAW.map(r=>r.distrito)));
+  fillSelect('fLogistica', uniqueSorted(RAW.map(r=>r.logistica)));
+  fillSelect('fMes', uniqueSorted(RAW.map(r=>r.mes)).sort((a,b)=>a-b), m => MESES[m] || m);
+}
+function uniqueSorted(arr){
+  return [...new Set(arr.filter(v=>v!==undefined && v!==null && v!==''))].sort();
+}
+function fillSelect(id, values, labelFn){
+  const el = document.getElementById(id);
+  el.innerHTML = '';
+  values.forEach(v=>{
+    const opt = document.createElement('option');
+    opt.value = v;
+    opt.textContent = labelFn ? labelFn(v) : v;
+    el.appendChild(opt);
+  });
+}
+function getSelected(id){
+  return Array.from(document.getElementById(id).selectedOptions).map(o=>o.value);
+}
+function clearFilters(){
+  ['fCategoria','fMarca','fDistrito','fLogistica','fMes'].forEach(id=>{
+    Array.from(document.getElementById(id).options).forEach(o=>o.selected=false);
+  });
+  applyFilters();
+}
+
+/* ============================================================
+   FILTROS + AGREGACIÓN
+   ============================================================ */
+function applyFilters(){
+  const cat = getSelected('fCategoria');
+  const marca = getSelected('fMarca');
+  const dist = getSelected('fDistrito');
+  const log = getSelected('fLogistica');
+  const mes = getSelected('fMes').map(Number);
+
+  FILTERED = RAW.filter(r=>
+    (cat.length===0 || cat.includes(r.categoria)) &&
+    (marca.length===0 || marca.includes(r.marca)) &&
+    (dist.length===0 || dist.includes(r.distrito)) &&
+    (log.length===0 || log.includes(r.logistica)) &&
+    (mes.length===0 || mes.includes(r.mes))
+  );
+
+  renderKPIs();
+  renderCharts();
+  renderDistritoTable();
+  renderLogisticaTable();
+  renderCategoriaTable();
+  renderSkuTable();
+}
+
+function sumField(rows, field){
+  return rows.reduce((acc,r)=>acc+(Number(r[field])||0), 0);
+}
+function pctVar(v2026, v2025){
+  if(!v2025) return v2026 ? 100 : 0;
+  return ((v2026 - v2025) / Math.abs(v2025)) * 100;
+}
+function fmtMoney(n){
+  return '$ ' + Math.round(n).toLocaleString('es-CO');
+}
+function fmtNum(n){
+  return Math.round(n).toLocaleString('es-CO');
+}
+function fmtPct(n){
+  const s = (n>=0?'+':'') + n.toFixed(1) + '%';
+  return s;
+}
+function pctClass(n){ return n>=0 ? 'pct-up' : 'pct-down'; }
+
+/* ============================================================
+   KPIs
+   ============================================================ */
+function renderKPIs(){
+  const v26 = sumField(FILTERED,'venta2026');
+  const v25 = sumField(FILTERED,'venta2025');
+  const u26 = sumField(FILTERED,'unidades2026');
+  const u25 = sumField(FILTERED,'unidades2025');
+  const costo26 = sumField(FILTERED,'costo2026');
+  const margen26 = v26 - costo26;
+  const varVenta = pctVar(v26, v25);
+  const varUnid = pctVar(u26, u25);
+  const margenPct = v26 ? (margen26 / v26) * 100 : 0;
+  const ticketProm = u26 ? v26 / u26 : 0;
+
+  const kpis = [
+    { label:'Venta 2026', value: fmtMoney(v26), sub: fmtPct(varVenta)+' vs 2025', cls: varVenta>=0?'up':'down' },
+    { label:'Venta 2025', value: fmtMoney(v25), sub: 'Base comparativa', cls:'' },
+    { label:'Unidades 2026', value: fmtNum(u26), sub: fmtPct(varUnid)+' vs 2025', cls: varUnid>=0?'up':'down' },
+    { label:'Unidades 2025', value: fmtNum(u25), sub: 'Base comparativa', cls:'' },
+    { label:'Costo 2026', value: fmtMoney(costo26), sub:'', cls:'', forest:true },
+    { label:'Margen 2026', value: fmtMoney(margen26), sub: margenPct.toFixed(1)+'% de venta', cls: margenPct>=0?'up':'down', forest:true },
+    { label:'Ticket promedio (venta/unid)', value: fmtMoney(ticketProm), sub:'', cls:'', forest:true },
+  ];
+
+  document.getElementById('kpiGrid').innerHTML = kpis.map(k=>`
+    <div class="kpi ${k.forest?'forest':''}">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value">${k.value}</div>
+      ${k.sub ? `<div class="kpi-sub ${k.cls==='up'?'up':k.cls==='down'?'down':''}">${k.sub}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+/* ============================================================
+   CHARTS (Resumen)
+   ============================================================ */
+function groupSum(rows, keyFn){
+  const map = {};
+  rows.forEach(r=>{
+    const k = keyFn(r);
+    if(!map[k]) map[k] = { venta2026:0, venta2025:0, unidades2026:0, unidades2025:0 };
+    map[k].venta2026 += Number(r.venta2026)||0;
+    map[k].venta2025 += Number(r.venta2025)||0;
+    map[k].unidades2026 += Number(r.unidades2026)||0;
+    map[k].unidades2025 += Number(r.unidades2025)||0;
+  });
+  return map;
+}
+function destroyChart(id){ if(charts[id]){ charts[id].destroy(); delete charts[id]; } }
+
+function renderCharts(){
+  renderMensualCharts();
+  renderLogisticaDonut();
+  renderDistritoChart();
+  renderLogisticaBarChart();
+  renderCategoriaChart();
+}
+
+function renderMensualCharts(){
+  const byMes = groupSum(FILTERED, r=>r.mes);
+  const meses = Object.keys(byMes).map(Number).sort((a,b)=>a-b);
+  const labels = meses.map(m=>MESES[m]||m);
+
+  destroyChart('mv');
+  charts.mv = new Chart(document.getElementById('chartMensualVenta'), {
+    type:'bar',
+    data:{ labels, datasets:[
+      { label:'Venta 2026', data: meses.map(m=>byMes[m].venta2026), backgroundColor:'#EA551D', borderRadius:4 },
+      { label:'Venta 2025', data: meses.map(m=>byMes[m].venta2025), backgroundColor:'#33513E', borderRadius:4 },
+    ]},
+    options: chartBaseOptions(true)
+  });
+
+  destroyChart('mu');
+  charts.mu = new Chart(document.getElementById('chartMensualUnidades'), {
+    type:'line',
+    data:{ labels, datasets:[
+      { label:'Unidades 2026', data: meses.map(m=>byMes[m].unidades2026), borderColor:'#EA551D', backgroundColor:'#EA551D', tension:.3 },
+      { label:'Unidades 2025', data: meses.map(m=>byMes[m].unidades2025), borderColor:'#33513E', backgroundColor:'#33513E', tension:.3 },
+    ]},
+    options: chartBaseOptions(false)
+  });
+}
+
+function renderLogisticaDonut(){
+  const byLog = groupSum(FILTERED, r=>r.logistica || 'Sin dato');
+  const labels = Object.keys(byLog);
+  destroyChart('ld');
+  charts.ld = new Chart(document.getElementById('chartLogisticaDonut'), {
+    type:'doughnut',
+    data:{ labels, datasets:[{ data: labels.map(l=>byLog[l].venta2026), backgroundColor:['#EA551D','#33513E','#C9A66B','#8C5E3C','#6B6459'] }]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ font:{family:'Inter'} } } } }
+  });
+}
+
+function renderDistritoChart(){
+  const byDist = groupSum(FILTERED, r=>r.distrito || 'Sin dato');
+  const sorted = Object.entries(byDist).sort((a,b)=>b[1].venta2026-a[1].venta2026).slice(0,12);
+  destroyChart('dc');
+  charts.dc = new Chart(document.getElementById('chartDistrito'), {
+    type:'bar',
+    data:{ labels: sorted.map(s=>s[0]), datasets:[{ label:'Venta 2026', data: sorted.map(s=>s[1].venta2026), backgroundColor:'#EA551D', borderRadius:4 }]},
+    options:{ ...chartBaseOptions(false), indexAxis:'y' }
+  });
+}
+
+function renderLogisticaBarChart(){
+  const byLog = groupSum(FILTERED, r=>r.logistica || 'Sin dato');
+  const labels = Object.keys(byLog);
+  destroyChart('lb');
+  charts.lb = new Chart(document.getElementById('chartLogisticaBar'), {
+    type:'bar',
+    data:{ labels, datasets:[
+      { label:'Venta 2026', data: labels.map(l=>byLog[l].venta2026), backgroundColor:'#EA551D', borderRadius:4 },
+      { label:'Venta 2025', data: labels.map(l=>byLog[l].venta2025), backgroundColor:'#33513E', borderRadius:4 },
+    ]},
+    options: chartBaseOptions(true)
+  });
+}
+
+function renderCategoriaChart(){
+  const byCat = groupSum(FILTERED, r=>r.categoria || 'Sin dato');
+  const sorted = Object.entries(byCat).sort((a,b)=>b[1].venta2026-a[1].venta2026).slice(0,10);
+  destroyChart('cc');
+  charts.cc = new Chart(document.getElementById('chartCategoria'), {
+    type:'bar',
+    data:{ labels: sorted.map(s=>s[0]), datasets:[{ label:'Venta 2026', data: sorted.map(s=>s[1].venta2026), backgroundColor:'#EA551D', borderRadius:4 }]},
+    options:{ ...chartBaseOptions(false), indexAxis:'y' }
+  });
+}
+
+function chartBaseOptions(showLegend){
+  return {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ display: showLegend, position:'bottom', labels:{ font:{family:'Inter'} } } },
+    scales:{
+      x:{ grid:{ display:false }, ticks:{ font:{family:'Inter', size:11} } },
+      y:{ grid:{ color:'#E4DACB' }, ticks:{ font:{family:'IBM Plex Mono', size:10} } }
+    }
+  };
+}
+
+/* ============================================================
+   TABLAS CON DRILL-DOWN
+   ============================================================ */
+function buildGroupRows(rows, keyField, labelFn){
+  const map = {};
+  rows.forEach(r=>{
+    const k = r[keyField] || 'Sin dato';
+    if(!map[k]) map[k] = { key:k, label: labelFn?labelFn(k):k, venta2026:0, venta2025:0, unidades2026:0, unidades2025:0 };
+    map[k].venta2026 += Number(r.venta2026)||0;
+    map[k].venta2025 += Number(r.venta2025)||0;
+    map[k].unidades2026 += Number(r.unidades2026)||0;
+    map[k].unidades2025 += Number(r.unidades2025)||0;
+  });
+  return Object.values(map).map(g=>({
+    ...g,
+    varVentaPct: pctVar(g.venta2026, g.venta2025),
+    varUnidPct: pctVar(g.unidades2026, g.unidades2025)
+  })).sort((a,b)=>b.venta2026-a.venta2026);
+}
+
+function rowHtml(g, indent, expandable, groupType){
+  return `<tr class="${expandable?'group-row':'child-row'}" ${expandable?`onclick="toggleGroup('${groupType}','${escapeAttr(g.key)}')"`:''}>
+    <td style="width:24px;">${expandable?`<span class="caret ${openGroups[groupType][g.key]?'open':''}">▶</span>`:''}</td>
+    <td style="padding-left:${indent}px">${g.label}</td>
+    <td class="num">${fmtMoney(g.venta2026)}</td>
+    <td class="num">${fmtMoney(g.venta2025)}</td>
+    <td class="num ${pctClass(g.varVentaPct)}">${fmtPct(g.varVentaPct)}</td>
+    <td class="num">${fmtNum(g.unidades2026)}</td>
+    <td class="num">${fmtNum(g.unidades2025)}</td>
+    <td class="num ${pctClass(g.varUnidPct)}">${fmtPct(g.varUnidPct)}</td>
+  </tr>`;
+}
+function escapeAttr(s){ return String(s).replace(/'/g,"\\'"); }
+
+function toggleGroup(type, key){
+  openGroups[type][key] = !openGroups[type][key];
+  if(type==='distrito') renderDistritoTable();
+  if(type==='logistica') renderLogisticaTable();
+  if(type==='categoria' || type==='marca') renderCategoriaTable();
+}
+
+function renderDistritoTable(){
+  const groups = buildGroupRows(FILTERED, 'distrito');
+  let html = '';
+  groups.forEach(g=>{
+    html += rowHtml(g, 4, true, 'distrito');
+    if(openGroups.distrito[g.key]){
+      const children = buildGroupRows(FILTERED.filter(r=>(r.distrito||'Sin dato')===g.key), 'nombre');
+      children.forEach(c=> html += rowHtml(c, 30, false, 'distrito'));
+    }
+  });
+  document.querySelector('#tblDistrito tbody').innerHTML = html || '<tr><td colspan="8" class="empty-note">Sin datos con los filtros actuales</td></tr>';
+}
+
+function renderLogisticaTable(){
+  const groups = buildGroupRows(FILTERED, 'logistica');
+  let html = '';
+  groups.forEach(g=>{
+    html += rowHtml(g, 4, true, 'logistica');
+    if(openGroups.logistica[g.key]){
+      const children = buildGroupRows(FILTERED.filter(r=>(r.logistica||'Sin dato')===g.key), 'categoria');
+      children.forEach(c=> html += rowHtml(c, 30, false, 'logistica'));
+    }
+  });
+  document.querySelector('#tblLogistica tbody').innerHTML = html || '<tr><td colspan="8" class="empty-note">Sin datos con los filtros actuales</td></tr>';
+}
+
+function renderCategoriaTable(){
+  const groups = buildGroupRows(FILTERED, 'categoria');
+  let html = '';
+  groups.forEach(cat=>{
+    html += rowHtml(cat, 4, true, 'categoria');
+    if(openGroups.categoria[cat.key]){
+      const marcaRows = buildGroupRows(FILTERED.filter(r=>(r.categoria||'Sin dato')===cat.key), 'marca');
+      marcaRows.forEach(m=>{
+        const marcaKey = cat.key + '||' + m.key;
+        html += rowHtml({...m, key:marcaKey}, 30, true, 'marca');
+        if(openGroups.marca[marcaKey]){
+          const artRows = buildGroupRows(
+            FILTERED.filter(r=>(r.categoria||'Sin dato')===cat.key && (r.marca||'Sin dato')===m.key),
+            'articulo'
+          );
+          artRows.forEach(a=> html += rowHtml(a, 56, false, 'marca'));
+        }
+      });
+    }
+  });
+  document.querySelector('#tblCategoria tbody').innerHTML = html || '<tr><td colspan="8" class="empty-note">Sin datos con los filtros actuales</td></tr>';
+}
+
+/* ============================================================
+   DETALLE SKU (tabla plana con búsqueda)
+   ============================================================ */
+function renderSkuTable(){
+  const term = (document.getElementById('skuSearch').value || '').toLowerCase();
+  const grouped = {};
+  FILTERED.forEach(r=>{
+    const k = [r.plu, r.centro].join('|');
+    if(!grouped[k]){
+      grouped[k] = {
+        articulo:r.articulo, marca:r.marca, categoria:r.categoria,
+        centroLabel: r.nombre || r.centro,
+        venta2026:0, venta2025:0, unidades2026:0, unidades2025:0
+      };
+    }
+    grouped[k].venta2026 += Number(r.venta2026)||0;
+    grouped[k].venta2025 += Number(r.venta2025)||0;
+    grouped[k].unidades2026 += Number(r.unidades2026)||0;
+    grouped[k].unidades2025 += Number(r.unidades2025)||0;
+  });
+
+  let rows = Object.values(grouped).map(r=>({...r, varVentaPct: pctVar(r.venta2026, r.venta2025)}));
+
+  if(term){
+    rows = rows.filter(r =>
+      (r.articulo||'').toLowerCase().includes(term) ||
+      (r.marca||'').toLowerCase().includes(term) ||
+      (r.centroLabel||'').toLowerCase().includes(term) ||
+      (r.categoria||'').toLowerCase().includes(term)
+    );
+  }
+  rows.sort((a,b)=>b.venta2026-a.venta2026);
+  rows = rows.slice(0, 500); // límite razonable en pantalla
+
+  document.querySelector('#tblSku tbody').innerHTML = rows.map(r=>`
+    <tr>
+      <td>${r.articulo}</td>
+      <td>${r.marca}</td>
+      <td>${r.categoria}</td>
+      <td>${r.centroLabel}</td>
+      <td class="num">${fmtMoney(r.venta2026)}</td>
+      <td class="num">${fmtMoney(r.venta2025)}</td>
+      <td class="num ${pctClass(r.varVentaPct)}">${fmtPct(r.varVentaPct)}</td>
+      <td class="num">${fmtNum(r.unidades2026)}</td>
+      <td class="num">${fmtNum(r.unidades2025)}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="9" class="empty-note">Sin resultados</td></tr>';
+}
+
+/* ============================================================
+   TABS
+   ============================================================ */
+function switchTab(tab){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active', p.id==='panel-'+tab));
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+loadData(false);
+</script>
+</body>
+</html>
