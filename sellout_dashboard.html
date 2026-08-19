@@ -5,348 +5,353 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sell Out YTD 2026 · Fithub</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root{
-    --orange:#EA551D;
-    --orange-light:#F7A88A;
-    --forest:#33513E;
-    --forest-light:#5C7C68;
-    --cream:#F7F2E9;
-    --cream-dark:#EFE6D6;
-    --paper:#FFFDF9;
-    --ink:#2A2622;
-    --ink-soft:#6B6459;
-    --line:#E4DACB;
-    --red:#C0392B;
-    --green:#2F7A4F;
-    --shadow: 0 2px 10px rgba(42,38,34,0.06);
-    --shadow-lg: 0 10px 30px rgba(42,38,34,0.10);
+    --sidebar-bg:#1B2130;
+    --sidebar-bg-soft:#242B3D;
+    --sidebar-text:#9AA3B8;
+    --sidebar-text-strong:#E7EAF1;
+    --orange:#FF6A3D;
+    --orange-deep:#EA551D;
+    --purple:#7C5CFC;
+    --green:#1FA971;
+    --blue:#2F80ED;
+    --red:#E5544D;
+    --cream:#F5F1E8;
+    --paper:#FFFFFF;
+    --ink:#20242E;
+    --ink-soft:#767C8C;
+    --line:#E7E2D6;
+    --shadow:0 2px 10px rgba(27,33,48,0.06);
+    --shadow-lg:0 12px 34px rgba(27,33,48,0.12);
   }
   *{box-sizing:border-box;}
-  body{
-    margin:0;
-    background:var(--cream);
-    color:var(--ink);
-    font-family:'Inter',sans-serif;
-    -webkit-font-smoothing:antialiased;
-  }
-  h1,h2,h3,.serif{ font-family:'Fraunces',serif; }
+  body{ margin:0; background:var(--cream); color:var(--ink); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+  .serif{ font-family:'Fraunces',serif; }
   .mono{ font-family:'IBM Plex Mono',monospace; }
 
-  .wrap{ max-width:1360px; margin:0 auto; padding:24px 20px 60px; }
+  /* ============ LOADING SPLASH ============ */
+  #splash{
+    position:fixed; inset:0; z-index:999; display:flex; align-items:center; justify-content:center;
+    background:radial-gradient(circle at 30% 20%, #F3E3D0 0%, var(--cream) 55%);
+    transition:opacity .4s ease;
+  }
+  #splash.hide{ opacity:0; pointer-events:none; }
+  .splash-card{
+    background:var(--paper); border-radius:20px; padding:40px 56px; text-align:center;
+    box-shadow:var(--shadow-lg); min-width:320px;
+  }
+  .splash-badge{
+    display:inline-block; background:var(--orange); color:#fff; font-size:11px; font-weight:700;
+    letter-spacing:.08em; padding:5px 14px; border-radius:999px; margin-bottom:16px;
+  }
+  .splash-logo{ font-family:'Fraunces',serif; font-weight:700; font-size:34px; color:var(--ink); margin-bottom:4px; }
+  .splash-logo span{ color:var(--orange); }
+  .splash-sub{ font-size:11.5px; letter-spacing:.1em; color:var(--ink-soft); text-transform:uppercase; margin-bottom:18px; }
+  .splash-line{ width:60px; height:3px; background:var(--orange); margin:0 auto 18px; border-radius:2px; }
+  .splash-status{ font-size:13.5px; color:var(--ink-soft); }
 
-  /* HEADER */
-  header{
-    display:flex; justify-content:space-between; align-items:flex-start;
-    flex-wrap:wrap; gap:16px; margin-bottom:22px;
-  }
-  header h1{ font-size:30px; font-weight:600; margin:0 0 4px; color:var(--forest); }
-  header p{ margin:0; color:var(--ink-soft); font-size:14px; }
-  .status-box{
-    display:flex; align-items:center; gap:10px;
-    background:var(--paper); border:1px solid var(--line); border-radius:12px;
-    padding:10px 16px; box-shadow:var(--shadow);
-  }
-  .dot{ width:9px; height:9px; border-radius:50%; background:var(--ink-soft); }
-  .dot.live{ background:var(--green); box-shadow:0 0 0 3px rgba(47,122,79,0.15); }
-  .dot.offline{ background:var(--red); box-shadow:0 0 0 3px rgba(192,57,43,0.15); }
-  .status-text{ font-size:12.5px; color:var(--ink-soft); line-height:1.3; }
-  .status-text b{ color:var(--ink); font-weight:600; }
-  button.refresh{
-    border:1px solid var(--line); background:var(--cream-dark); color:var(--forest);
-    font-family:'Inter',sans-serif; font-weight:600; font-size:12.5px;
-    padding:8px 12px; border-radius:9px; cursor:pointer; transition:.15s;
-  }
-  button.refresh:hover{ background:var(--forest); color:#fff; }
+  /* ============ LAYOUT ============ */
+  .app{ display:flex; min-height:100vh; }
 
-  /* KPIs */
-  .kpi-grid{
-    display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
-    gap:14px; margin-bottom:22px;
+  /* SIDEBAR */
+  .sidebar{
+    width:250px; flex-shrink:0; background:var(--sidebar-bg); color:var(--sidebar-text);
+    display:flex; flex-direction:column; padding:22px 16px; position:sticky; top:0; height:100vh;
   }
-  .kpi{
-    background:var(--paper); border:1px solid var(--line); border-radius:14px;
-    padding:16px 18px; box-shadow:var(--shadow); position:relative; overflow:hidden;
+  .brand{ padding:4px 6px 14px; }
+  .brand-badge{
+    display:inline-block; background:var(--orange); color:#fff; font-size:10px; font-weight:700;
+    letter-spacing:.08em; padding:4px 10px; border-radius:999px; margin-bottom:10px;
   }
-  .kpi::before{
-    content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--orange);
-  }
-  .kpi.forest::before{ background:var(--forest); }
-  .kpi-label{ font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); font-weight:600; margin-bottom:6px; }
-  .kpi-value{ font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:600; color:var(--ink); }
-  .kpi-sub{ font-size:12.5px; margin-top:4px; font-weight:600; }
-  .kpi-sub.up{ color:var(--green); }
-  .kpi-sub.down{ color:var(--red); }
+  .brand-logo{ font-family:'Fraunces',serif; font-weight:700; font-size:24px; color:#fff; }
+  .brand-logo span{ color:var(--orange); }
+  .brand-sub{ font-size:10.5px; letter-spacing:.08em; color:var(--sidebar-text); text-transform:uppercase; margin-top:2px; }
 
-  /* FILTERS */
+  .nav-label{ font-size:10.5px; letter-spacing:.08em; color:#5C6479; text-transform:uppercase; margin:18px 10px 8px; }
+  .nav-item{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    padding:10px 12px; border-radius:10px; cursor:pointer; font-size:13.5px; font-weight:600;
+    color:var(--sidebar-text); margin-bottom:2px; transition:.12s;
+  }
+  .nav-item .nav-ic{ width:18px; text-align:center; margin-right:8px; opacity:.85; }
+  .nav-item .nav-lbl{ display:flex; align-items:center; flex:1; }
+  .nav-item .nav-count{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; color:#7B8296; background:var(--sidebar-bg-soft);
+    padding:2px 7px; border-radius:7px;
+  }
+  .nav-item:hover{ background:var(--sidebar-bg-soft); color:var(--sidebar-text-strong); }
+  .nav-item.active{ background:var(--sidebar-bg-soft); color:var(--orange); }
+  .nav-item.active .nav-count{ background:rgba(255,106,61,0.15); color:var(--orange); }
+
+  .sidebar-stats{ margin-top:auto; padding:14px 12px; border-top:1px solid rgba(255,255,255,0.08); }
+  .stat-row{ display:flex; justify-content:space-between; font-size:12.5px; padding:4px 0; color:var(--sidebar-text); }
+  .stat-row b{ color:var(--sidebar-text-strong); font-family:'IBM Plex Mono',monospace; font-weight:600; }
+  .sidebar-actions{ padding:10px 4px 0; display:flex; flex-direction:column; gap:8px; }
+  .btn-side{
+    border:none; border-radius:10px; padding:10px 12px; font-weight:700; font-size:12.5px; cursor:pointer;
+    font-family:'Inter',sans-serif; text-align:center;
+  }
+  .btn-side.primary{ background:var(--orange); color:#fff; }
+  .btn-side.primary:hover{ background:var(--orange-deep); }
+  .status-line{ display:flex; align-items:center; gap:6px; font-size:11px; color:var(--sidebar-text); margin-top:8px; }
+  .status-dot{ width:7px; height:7px; border-radius:50%; background:#5C6479; }
+  .status-dot.live{ background:var(--green); box-shadow:0 0 0 3px rgba(31,169,113,0.18); }
+  .status-dot.offline{ background:var(--red); box-shadow:0 0 0 3px rgba(229,84,77,0.18); }
+
+  /* MAIN */
+  main{ flex:1; padding:24px 28px 50px; min-width:0; }
+
   .filters{
-    background:var(--paper); border:1px solid var(--line); border-radius:14px;
-    padding:14px 16px; margin-bottom:20px; box-shadow:var(--shadow);
-    display:flex; flex-wrap:wrap; gap:14px; align-items:flex-end;
+    display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:20px;
   }
-  .filter-group{ display:flex; flex-direction:column; gap:6px; min-width:170px; flex:1; }
-  .filter-group label{ font-size:11px; font-weight:600; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em; }
-  .filter-group select, .filter-group input{
-    border:1px solid var(--line); border-radius:9px; padding:8px 10px;
-    font-family:'Inter',sans-serif; font-size:13px; background:var(--cream);
-    color:var(--ink);
+  .filters select, .filters input{
+    border:1px solid var(--line); background:var(--paper); border-radius:10px; padding:9px 12px;
+    font-family:'Inter',sans-serif; font-size:13px; color:var(--ink); min-width:130px; box-shadow:var(--shadow);
   }
-  .filter-group select[multiple]{ min-height:74px; }
-  .filters .clear-btn{
-    align-self:flex-end; border:1px solid var(--orange); color:var(--orange);
-    background:transparent; padding:8px 14px; border-radius:9px; font-weight:600;
-    font-size:12.5px; cursor:pointer; height:fit-content;
+  .filters .search-input{ flex:1; min-width:200px; }
+  .filters .clear-link{
+    color:var(--orange); font-weight:600; font-size:12.5px; cursor:pointer; padding:9px 6px; white-space:nowrap;
   }
-  .filters .clear-btn:hover{ background:var(--orange); color:#fff; }
 
-  /* TABS */
-  .tabs{ display:flex; gap:6px; margin-bottom:18px; flex-wrap:wrap; }
-  .tab-btn{
-    border:1px solid var(--line); background:var(--paper); color:var(--ink-soft);
-    padding:10px 16px; border-radius:10px 10px 0 0; font-weight:600; font-size:13.5px;
-    cursor:pointer; font-family:'Inter',sans-serif;
-  }
-  .tab-btn.active{ background:var(--forest); color:#fff; border-color:var(--forest); }
-  .tab-panel{ display:none; }
-  .tab-panel.active{ display:block; }
+  .kpi-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px; }
+  @media (max-width:1100px){ .kpi-grid{ grid-template-columns:repeat(2,1fr); } }
+  .kpi{ background:var(--paper); border-radius:16px; padding:18px 20px; box-shadow:var(--shadow); }
+  .kpi-top{ display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+  .kpi-ic{ width:26px; height:26px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:13px; }
+  .kpi-label{ font-size:11.5px; letter-spacing:.03em; text-transform:uppercase; color:var(--ink-soft); font-weight:700; }
+  .kpi-value{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:25px; margin-bottom:4px; }
+  .kpi-sub{ font-size:12px; color:var(--ink-soft); }
 
-  .card{
-    background:var(--paper); border:1px solid var(--line); border-radius:14px;
-    padding:20px; margin-bottom:18px; box-shadow:var(--shadow);
-  }
-  .card h3{ margin:0 0 14px; font-size:17px; color:var(--forest); font-weight:600; }
-  .chart-box{ position:relative; height:320px; }
+  .panel-grid-3{ display:grid; grid-template-columns:1.15fr 1fr 1fr; gap:16px; margin-bottom:16px; }
+  .panel-grid-2{ display:grid; grid-template-columns:1fr 1.3fr; gap:16px; margin-bottom:16px; }
+  @media (max-width:1100px){ .panel-grid-3, .panel-grid-2{ grid-template-columns:1fr; } }
 
-  .grid-2{ display:grid; grid-template-columns:1.3fr 1fr; gap:18px; }
-  @media (max-width:900px){ .grid-2{ grid-template-columns:1fr; } }
+  .card{ background:var(--paper); border-radius:16px; padding:18px 20px; box-shadow:var(--shadow); }
+  .card h3{ margin:0 0 12px; font-size:14.5px; font-weight:700; color:var(--ink); display:flex; justify-content:space-between; align-items:center; }
+  .card h3 .toggle-btn{
+    font-size:11px; font-weight:600; color:var(--ink-soft); background:var(--cream); border:none;
+    padding:4px 10px; border-radius:8px; cursor:pointer;
+  }
+  .chart-box{ position:relative; height:260px; }
+  .chart-box.tall{ height:320px; }
+
+  .rank-list{ display:flex; flex-direction:column; gap:9px; max-height:320px; overflow-y:auto; }
+  .rank-row{ display:flex; align-items:center; gap:10px; }
+  .rank-label{ font-size:12.5px; width:150px; flex-shrink:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--ink); font-weight:600; }
+  .rank-bar-bg{ flex:1; height:9px; background:var(--cream); border-radius:5px; overflow:hidden; }
+  .rank-bar-fill{ height:100%; background:var(--purple); border-radius:5px; }
+  .rank-value{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-soft); width:74px; text-align:right; flex-shrink:0; }
 
   table{ width:100%; border-collapse:collapse; font-size:13px; }
   th{
-    text-align:left; padding:9px 10px; font-size:11px; text-transform:uppercase;
-    letter-spacing:.03em; color:var(--ink-soft); border-bottom:2px solid var(--line);
-    cursor:pointer; user-select:none; white-space:nowrap;
+    text-align:left; padding:9px 10px; font-size:10.5px; text-transform:uppercase; letter-spacing:.03em;
+    color:var(--ink-soft); border-bottom:2px solid var(--line); white-space:nowrap;
   }
-  th:hover{ color:var(--orange); }
   td{ padding:9px 10px; border-bottom:1px solid var(--line); vertical-align:middle; }
   tr.group-row{ cursor:pointer; }
-  tr.group-row:hover{ background:var(--cream-dark); }
-  tr.child-row td:first-child{ padding-left:30px; color:var(--ink-soft); }
+  tr.group-row:hover{ background:var(--cream); }
   .num{ font-family:'IBM Plex Mono',monospace; text-align:right; white-space:nowrap; }
-  .pct-up{ color:var(--green); font-weight:600; }
-  .pct-down{ color:var(--red); font-weight:600; }
-  .caret{ display:inline-block; width:14px; transition:transform .15s; color:var(--orange); font-weight:700; }
+  .pct-up{ color:var(--green); font-weight:700; }
+  .pct-down{ color:var(--red); font-weight:700; }
+  .caret{ display:inline-block; width:14px; color:var(--orange); font-weight:700; transition:transform .15s; }
   .caret.open{ transform:rotate(90deg); }
-  .search-box{
-    border:1px solid var(--line); border-radius:9px; padding:8px 12px; font-size:13px;
-    width:100%; margin-bottom:12px; font-family:'Inter',sans-serif; background:var(--cream);
-  }
-  .badge{
-    display:inline-block; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:600;
-    background:var(--cream-dark); color:var(--forest);
-  }
   .table-scroll{ max-height:520px; overflow-y:auto; }
+  .badge-soft{ font-size:11px; font-weight:600; color:var(--ink-soft); background:var(--cream); padding:3px 9px; border-radius:7px; }
   .empty-note{ color:var(--ink-soft); font-size:13px; padding:20px; text-align:center; }
-  footer{ text-align:center; color:var(--ink-soft); font-size:12px; margin-top:30px; }
+
+  .page{ display:none; }
+  .page.active{ display:block; }
+  .page-header{ margin-bottom:16px; }
+  .page-header h2{ font-family:'Fraunces',serif; font-size:22px; margin:0 0 2px; }
+  .page-header p{ margin:0; color:var(--ink-soft); font-size:13px; }
 </style>
 </head>
 <body>
-<div class="wrap">
 
-  <header>
-    <div>
-      <h1>Sell Out YTD 2026</h1>
-      <p>Venta, unidades y comparativo 2026 vs 2025 · por distrito, logística, categoría y marca</p>
+<div id="splash">
+  <div class="splash-card">
+    <div class="splash-badge">SUPER TIENDAS</div>
+    <div class="splash-logo">fit<span>hub</span></div>
+    <div class="splash-sub">Dashboard Sell Out YTD 2026</div>
+    <div class="splash-line"></div>
+    <div class="splash-status" id="splashStatus">Descargando datos...</div>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-badge">SUPER TIENDAS</div>
+      <div class="brand-logo">fit<span>hub</span></div>
+      <div class="brand-sub">Sell Out YTD 2026</div>
     </div>
-    <div class="status-box">
-      <div class="dot" id="statusDot"></div>
-      <div class="status-text">
-        <div id="statusText">Conectando...</div>
-        <div>Última actualización: <b id="lastUpdate">—</b></div>
+
+    <div class="nav-label">Navegación</div>
+    <div class="nav-item active" data-page="resumen" onclick="switchPage('resumen')">
+      <span class="nav-lbl"><span class="nav-ic">▤</span>Resumen</span>
+    </div>
+    <div class="nav-item" data-page="distrito" onclick="switchPage('distrito')">
+      <span class="nav-lbl"><span class="nav-ic">◈</span>Distritos</span>
+      <span class="nav-count" id="countDistrito">0</span>
+    </div>
+    <div class="nav-item" data-page="logistica" onclick="switchPage('logistica')">
+      <span class="nav-lbl"><span class="nav-ic">▣</span>Logística</span>
+      <span class="nav-count" id="countLogistica">0</span>
+    </div>
+    <div class="nav-item" data-page="catmarca" onclick="switchPage('catmarca')">
+      <span class="nav-lbl"><span class="nav-ic">◆</span>Categoría / Marca</span>
+      <span class="nav-count" id="countCategoria">0</span>
+    </div>
+    <div class="nav-item" data-page="sku" onclick="switchPage('sku')">
+      <span class="nav-lbl"><span class="nav-ic">▦</span>Detalle SKU</span>
+      <span class="nav-count" id="countSku">0</span>
+    </div>
+
+    <div class="sidebar-stats">
+      <div class="stat-row"><span>Registros</span><b id="statRegistros">0</b></div>
+      <div class="stat-row"><span>SKUs únicos</span><b id="statSkus">0</b></div>
+      <div class="stat-row"><span>Centros</span><b id="statCentros">0</b></div>
+      <div class="stat-row"><span>Cargado</span><b id="statCargado">—</b></div>
+      <div class="status-line"><span class="status-dot" id="statusDot"></span><span id="statusText">Conectando...</span></div>
+      <div class="sidebar-actions">
+        <button class="btn-side primary" onclick="loadData()">↻ Actualizar</button>
       </div>
-      <button class="refresh" onclick="loadData(true)">↻ Actualizar</button>
     </div>
-  </header>
+  </aside>
 
-  <div class="kpi-grid" id="kpiGrid"></div>
+  <!-- MAIN -->
+  <main>
+    <div class="filters">
+      <select id="fCategoria" onchange="applyFilters()"><option value="">Categoría: Todas</option></select>
+      <select id="fMarca" onchange="applyFilters()"><option value="">Marca: Todas</option></select>
+      <select id="fDistrito" onchange="applyFilters()"><option value="">Distrito: Todos</option></select>
+      <select id="fLogistica" onchange="applyFilters()"><option value="">Logística: Todas</option></select>
+      <select id="fMes" onchange="applyFilters()"><option value="">Mes: Todos</option></select>
+      <input class="search-input" id="globalSearch" placeholder="Buscar artículo, centro, marca..." oninput="applyFilters()">
+      <span class="clear-link" onclick="clearFilters()">Limpiar filtros</span>
+    </div>
 
-  <div class="filters">
-    <div class="filter-group">
-      <label>Categoría</label>
-      <select multiple id="fCategoria" onchange="applyFilters()"></select>
-    </div>
-    <div class="filter-group">
-      <label>Marca</label>
-      <select multiple id="fMarca" onchange="applyFilters()"></select>
-    </div>
-    <div class="filter-group">
-      <label>Distrito</label>
-      <select multiple id="fDistrito" onchange="applyFilters()"></select>
-    </div>
-    <div class="filter-group">
-      <label>Logística</label>
-      <select multiple id="fLogistica" onchange="applyFilters()"></select>
-    </div>
-    <div class="filter-group">
-      <label>Mes</label>
-      <select multiple id="fMes" onchange="applyFilters()"></select>
-    </div>
-    <button class="clear-btn" onclick="clearFilters()">Limpiar filtros</button>
-  </div>
+    <div class="kpi-grid" id="kpiGrid"></div>
 
-  <div class="tabs">
-    <button class="tab-btn active" data-tab="resumen" onclick="switchTab('resumen')">Resumen</button>
-    <button class="tab-btn" data-tab="distrito" onclick="switchTab('distrito')">Distritos</button>
-    <button class="tab-btn" data-tab="logistica" onclick="switchTab('logistica')">Logística</button>
-    <button class="tab-btn" data-tab="catmarca" onclick="switchTab('catmarca')">Categoría / Marca</button>
-    <button class="tab-btn" data-tab="sku" onclick="switchTab('sku')">Detalle SKU</button>
-  </div>
-
-  <!-- RESUMEN -->
-  <div class="tab-panel active" id="panel-resumen">
-    <div class="card">
-      <h3>Evolución mensual — Venta 2026 vs 2025</h3>
-      <div class="chart-box"><canvas id="chartMensualVenta"></canvas></div>
+    <!-- RESUMEN -->
+    <div class="page active" id="page-resumen">
+      <div class="panel-grid-3">
+        <div class="card">
+          <h3>Evolución mensual — Venta 2026 vs 2025</h3>
+          <div class="chart-box"><canvas id="chartMensualVenta"></canvas></div>
+        </div>
+        <div class="card">
+          <h3>Participación por Logística</h3>
+          <div class="chart-box"><canvas id="chartLogisticaDonut"></canvas></div>
+        </div>
+        <div class="card">
+          <h3>Top Distritos por Venta</h3>
+          <div class="chart-box"><canvas id="chartDistritoMini"></canvas></div>
+        </div>
+      </div>
+      <div class="panel-grid-2">
+        <div class="card">
+          <h3>Top Categorías (venta 2026)</h3>
+          <div class="rank-list" id="rankCategoria"></div>
+        </div>
+        <div class="card">
+          <h3>Unidades por mes — 2026 vs 2025</h3>
+          <div class="chart-box"><canvas id="chartMensualUnidades"></canvas></div>
+        </div>
+      </div>
     </div>
-    <div class="grid-2">
+
+    <!-- DISTRITO -->
+    <div class="page" id="page-distrito">
+      <div class="page-header"><h2>Distritos</h2><p>Venta y unidades por distrito · clic en una fila para ver sus centros</p></div>
+      <div class="card" style="margin-bottom:16px;">
+        <h3>Venta 2026 por Distrito</h3>
+        <div class="chart-box tall"><canvas id="chartDistrito"></canvas></div>
+      </div>
       <div class="card">
-        <h3>Unidades por mes — 2026 vs 2025</h3>
-        <div class="chart-box"><canvas id="chartMensualUnidades"></canvas></div>
+        <div class="table-scroll">
+          <table id="tblDistrito">
+            <thead><tr><th></th><th>Distrito</th><th class="num">Venta 2026</th><th class="num">Venta 2025</th><th class="num">Var %</th><th class="num">Unid. 2026</th><th class="num">Unid. 2025</th><th class="num">Var % Unid</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOGISTICA -->
+    <div class="page" id="page-logistica">
+      <div class="page-header"><h2>Logística</h2><p>Directoo vs otros canales · clic en una fila para ver sus categorías</p></div>
+      <div class="card" style="margin-bottom:16px;">
+        <h3>Venta 2026 por tipo de Logística</h3>
+        <div class="chart-box tall"><canvas id="chartLogisticaBar"></canvas></div>
       </div>
       <div class="card">
-        <h3>Participación de venta por Logística</h3>
-        <div class="chart-box"><canvas id="chartLogisticaDonut"></canvas></div>
+        <div class="table-scroll">
+          <table id="tblLogistica">
+            <thead><tr><th></th><th>Logística</th><th class="num">Venta 2026</th><th class="num">Venta 2025</th><th class="num">Var %</th><th class="num">Unid. 2026</th><th class="num">Unid. 2025</th><th class="num">Var % Unid</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- DISTRITO -->
-  <div class="tab-panel" id="panel-distrito">
-    <div class="card">
-      <h3>Venta 2026 por Distrito</h3>
-      <div class="chart-box"><canvas id="chartDistrito"></canvas></div>
-    </div>
-    <div class="card">
-      <h3>Detalle por Distrito <span class="badge">clic en fila para ver centros</span></h3>
-      <div class="table-scroll">
-        <table id="tblDistrito">
-          <thead><tr>
-            <th></th>
-            <th data-sort="label">Distrito</th>
-            <th data-sort="venta2026" class="num">Venta 2026</th>
-            <th data-sort="venta2025" class="num">Venta 2025</th>
-            <th data-sort="varVentaPct" class="num">Var %</th>
-            <th data-sort="unidades2026" class="num">Unid. 2026</th>
-            <th data-sort="unidades2025" class="num">Unid. 2025</th>
-            <th data-sort="varUnidPct" class="num">Var % Unid</th>
-          </tr></thead>
-          <tbody></tbody>
-        </table>
+    <!-- CATEGORIA / MARCA -->
+    <div class="page" id="page-catmarca">
+      <div class="page-header"><h2>Categoría / Marca</h2><p>Drill-down de 2 niveles: Categoría → Marca → Artículo</p></div>
+      <div class="card" style="margin-bottom:16px;">
+        <h3>Top Categorías por Venta 2026</h3>
+        <div class="chart-box tall"><canvas id="chartCategoria"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="table-scroll">
+          <table id="tblCategoria">
+            <thead><tr><th></th><th>Categoría / Marca / Artículo</th><th class="num">Venta 2026</th><th class="num">Venta 2025</th><th class="num">Var %</th><th class="num">Unid. 2026</th><th class="num">Unid. 2025</th><th class="num">Var % Unid</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- LOGISTICA -->
-  <div class="tab-panel" id="panel-logistica">
-    <div class="card">
-      <h3>Venta 2026 por tipo de Logística</h3>
-      <div class="chart-box"><canvas id="chartLogisticaBar"></canvas></div>
-    </div>
-    <div class="card">
-      <h3>Detalle por Logística <span class="badge">clic en fila para ver categorías</span></h3>
-      <div class="table-scroll">
-        <table id="tblLogistica">
-          <thead><tr>
-            <th></th>
-            <th data-sort="label">Logística</th>
-            <th data-sort="venta2026" class="num">Venta 2026</th>
-            <th data-sort="venta2025" class="num">Venta 2025</th>
-            <th data-sort="varVentaPct" class="num">Var %</th>
-            <th data-sort="unidades2026" class="num">Unid. 2026</th>
-            <th data-sort="unidades2025" class="num">Unid. 2025</th>
-            <th data-sort="varUnidPct" class="num">Var % Unid</th>
-          </tr></thead>
-          <tbody></tbody>
-        </table>
+    <!-- SKU -->
+    <div class="page" id="page-sku">
+      <div class="page-header"><h2>Detalle SKU</h2><p>Tabla plana por artículo + centro · usa el buscador de arriba para filtrar</p></div>
+      <div class="card">
+        <div class="table-scroll">
+          <table id="tblSku">
+            <thead><tr><th>Artículo</th><th>Marca</th><th>Categoría</th><th>Centro</th><th class="num">Venta 2026</th><th class="num">Venta 2025</th><th class="num">Var %</th><th class="num">Unid. 2026</th><th class="num">Unid. 2025</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- CATEGORIA / MARCA -->
-  <div class="tab-panel" id="panel-catmarca">
-    <div class="card">
-      <h3>Top Categorías por Venta 2026</h3>
-      <div class="chart-box"><canvas id="chartCategoria"></canvas></div>
-    </div>
-    <div class="card">
-      <h3>Categoría → Marca → Artículo <span class="badge">drill-down de 2 niveles</span></h3>
-      <div class="table-scroll">
-        <table id="tblCategoria">
-          <thead><tr>
-            <th></th>
-            <th data-sort="label">Categoría / Marca / Artículo</th>
-            <th data-sort="venta2026" class="num">Venta 2026</th>
-            <th data-sort="venta2025" class="num">Venta 2025</th>
-            <th data-sort="varVentaPct" class="num">Var %</th>
-            <th data-sort="unidades2026" class="num">Unid. 2026</th>
-            <th data-sort="unidades2025" class="num">Unid. 2025</th>
-            <th data-sort="varUnidPct" class="num">Var % Unid</th>
-          </tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- SKU DETAIL -->
-  <div class="tab-panel" id="panel-sku">
-    <div class="card">
-      <input class="search-box" id="skuSearch" placeholder="Buscar por artículo, PLU, centro o marca..." oninput="renderSkuTable()">
-      <div class="table-scroll">
-        <table id="tblSku">
-          <thead><tr>
-            <th data-sort="articulo">Artículo</th>
-            <th data-sort="marca">Marca</th>
-            <th data-sort="categoria">Categoría</th>
-            <th data-sort="centroLabel">Centro</th>
-            <th data-sort="venta2026" class="num">Venta 2026</th>
-            <th data-sort="venta2025" class="num">Venta 2025</th>
-            <th data-sort="varVentaPct" class="num">Var %</th>
-            <th data-sort="unidades2026" class="num">Unid. 2026</th>
-            <th data-sort="unidades2025" class="num">Unid. 2025</th>
-          </tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <footer>Fithub · Dashboard Sell Out YTD · datos vía Google Sheets (Apps Script)</footer>
+  </main>
 </div>
 
 <script>
 /* ============================================================
    CONFIGURACIÓN
    ============================================================ */
-// Reemplaza esta URL por la de tu Web App de Apps Script una vez
-// despliegues Code.gs (Implementar > Nueva implementación > Aplicación web).
 const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbyj3jnMaV7auvbFVnceOIbdB2UoLqH6Qmr8gDXmdOsOFTYCXzvupXB19Rr_h2ReptYj/exec';
-const CACHE_KEY = 'fithub_sellout_cache_v1';
-
+const CACHE_KEY = 'fithub_sellout_cache_v2';
 const MESES = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
-let RAW = [];            // registros crudos (SKU+Centro+Mes) desde el backend
-let FILTERED = [];       // luego de aplicar filtros globales
+let RAW = [];
+let FILTERED = [];
 let openGroups = { distrito:{}, logistica:{}, categoria:{}, marca:{} };
-let sortState = {};
 let charts = {};
 
 /* ============================================================
-   CARGA DE DATOS (JSONP con fallback a caché local)
+   CARGA DE DATOS
    ============================================================ */
-function loadData(forceRefresh){
+function loadData(){
   setStatus('loading');
+  setSplash('Descargando datos...');
   const cb = 'cb_' + Date.now();
   let done = false;
 
@@ -355,15 +360,11 @@ function loadData(forceRefresh){
       done = true;
       delete window[cb];
       const cached = getCache();
-      if(cached){
-        RAW = cached.records;
-        setStatus('offline', cached.updated, true);
-        onDataReady();
-      } else {
-        setStatus('error');
-      }
+      if(cached){ RAW = cached.records; setStatus('offline', cached.updated); onDataReady(); }
+      else setStatus('error');
+      hideSplash();
     }
-  }, 12000);
+  }, 20000);
 
   window[cb] = function(payload){
     if(done) return;
@@ -371,16 +372,17 @@ function loadData(forceRefresh){
     clearTimeout(timeout);
     delete window[cb];
     if(payload.error){
-      console.error('Error backend:', payload.error);
       const cached = getCache();
-      if(cached){ RAW = cached.records; setStatus('offline', cached.updated, true); onDataReady(); }
+      if(cached){ RAW = cached.records; setStatus('offline', cached.updated); onDataReady(); }
       else setStatus('error');
+      hideSplash();
       return;
     }
     RAW = payload.records || [];
     setCache({ records: RAW, updated: payload.updated });
     setStatus('live', payload.updated);
     onDataReady();
+    hideSplash();
   };
 
   const script = document.createElement('script');
@@ -390,90 +392,76 @@ function loadData(forceRefresh){
     done = true;
     clearTimeout(timeout);
     const cached = getCache();
-    if(cached){ RAW = cached.records; setStatus('offline', cached.updated, true); onDataReady(); }
+    if(cached){ RAW = cached.records; setStatus('offline', cached.updated); onDataReady(); }
     else setStatus('error');
+    hideSplash();
   };
   document.body.appendChild(script);
 }
+function getCache(){ try{ const r = localStorage.getItem(CACHE_KEY); return r ? JSON.parse(r) : null; }catch(e){ return null; } }
+function setCache(o){ try{ localStorage.setItem(CACHE_KEY, JSON.stringify(o)); }catch(e){} }
+function setSplash(msg){ const s=document.getElementById('splashStatus'); if(s) s.textContent = msg; }
+function hideSplash(){ const el = document.getElementById('splash'); if(el){ el.classList.add('hide'); setTimeout(()=>el.remove(), 500); } }
 
-function getCache(){
-  try{
-    const raw = localStorage.getItem(CACHE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  }catch(e){ return null; }
-}
-function setCache(obj){
-  try{ localStorage.setItem(CACHE_KEY, JSON.stringify(obj)); }catch(e){}
-}
-
-function setStatus(state, updated, isCache){
+function setStatus(state, updated){
   const dot = document.getElementById('statusDot');
   const text = document.getElementById('statusText');
-  const lu = document.getElementById('lastUpdate');
-  dot.className = 'dot';
+  const cargado = document.getElementById('statCargado');
+  dot.className = 'status-dot';
   if(state==='loading'){ text.textContent = 'Conectando...'; }
   else if(state==='live'){ dot.classList.add('live'); text.textContent = 'Conectado en vivo'; }
-  else if(state==='offline'){ dot.classList.add('offline'); text.textContent = 'Sin conexión — mostrando caché local'; }
-  else if(state==='error'){ dot.classList.add('offline'); text.textContent = 'No se pudo conectar. Configura SHEETS_API_URL.'; }
-  if(updated){ lu.textContent = new Date(updated).toLocaleString('es-CO'); }
+  else if(state==='offline'){ dot.classList.add('offline'); text.textContent = 'Sin conexión — caché local'; }
+  else if(state==='error'){ dot.classList.add('offline'); text.textContent = 'No se pudo conectar'; }
+  if(updated) cargado.textContent = new Date(updated).toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'});
 }
 
 /* ============================================================
-   ARRANQUE
+   ARRANQUE + FILTROS
    ============================================================ */
 function onDataReady(){
   populateFilterOptions();
   applyFilters();
 }
-
 function populateFilterOptions(){
-  fillSelect('fCategoria', uniqueSorted(RAW.map(r=>r.categoria)));
-  fillSelect('fMarca', uniqueSorted(RAW.map(r=>r.marca)));
-  fillSelect('fDistrito', uniqueSorted(RAW.map(r=>r.distrito)));
-  fillSelect('fLogistica', uniqueSorted(RAW.map(r=>r.logistica)));
-  fillSelect('fMes', uniqueSorted(RAW.map(r=>r.mes)).sort((a,b)=>a-b), m => MESES[m] || m);
+  fillSelect('fCategoria', uniqueSorted(RAW.map(r=>r.categoria)), 'Categoría: Todas');
+  fillSelect('fMarca', uniqueSorted(RAW.map(r=>r.marca)), 'Marca: Todas');
+  fillSelect('fDistrito', uniqueSorted(RAW.map(r=>r.distrito)), 'Distrito: Todos');
+  fillSelect('fLogistica', uniqueSorted(RAW.map(r=>r.logistica)), 'Logística: Todas');
+  fillSelect('fMes', uniqueSorted(RAW.map(r=>r.mes)).sort((a,b)=>a-b), 'Mes: Todos', m => MESES[m]||m);
 }
-function uniqueSorted(arr){
-  return [...new Set(arr.filter(v=>v!==undefined && v!==null && v!==''))].sort();
-}
-function fillSelect(id, values, labelFn){
+function uniqueSorted(arr){ return [...new Set(arr.filter(v=>v!==undefined && v!==null && v!==''))].sort(); }
+function fillSelect(id, values, placeholder, labelFn){
   const el = document.getElementById(id);
-  el.innerHTML = '';
+  el.innerHTML = `<option value="">${placeholder}</option>`;
   values.forEach(v=>{
     const opt = document.createElement('option');
-    opt.value = v;
-    opt.textContent = labelFn ? labelFn(v) : v;
+    opt.value = v; opt.textContent = labelFn ? labelFn(v) : v;
     el.appendChild(opt);
   });
 }
-function getSelected(id){
-  return Array.from(document.getElementById(id).selectedOptions).map(o=>o.value);
-}
 function clearFilters(){
-  ['fCategoria','fMarca','fDistrito','fLogistica','fMes'].forEach(id=>{
-    Array.from(document.getElementById(id).options).forEach(o=>o.selected=false);
-  });
+  ['fCategoria','fMarca','fDistrito','fLogistica','fMes'].forEach(id=> document.getElementById(id).value = '');
+  document.getElementById('globalSearch').value = '';
   applyFilters();
 }
-
-/* ============================================================
-   FILTROS + AGREGACIÓN
-   ============================================================ */
 function applyFilters(){
-  const cat = getSelected('fCategoria');
-  const marca = getSelected('fMarca');
-  const dist = getSelected('fDistrito');
-  const log = getSelected('fLogistica');
-  const mes = getSelected('fMes').map(Number);
+  const cat = document.getElementById('fCategoria').value;
+  const marca = document.getElementById('fMarca').value;
+  const dist = document.getElementById('fDistrito').value;
+  const log = document.getElementById('fLogistica').value;
+  const mes = document.getElementById('fMes').value;
+  const term = (document.getElementById('globalSearch').value || '').toLowerCase();
 
   FILTERED = RAW.filter(r=>
-    (cat.length===0 || cat.includes(r.categoria)) &&
-    (marca.length===0 || marca.includes(r.marca)) &&
-    (dist.length===0 || dist.includes(r.distrito)) &&
-    (log.length===0 || log.includes(r.logistica)) &&
-    (mes.length===0 || mes.includes(r.mes))
+    (!cat || r.categoria===cat) &&
+    (!marca || r.marca===marca) &&
+    (!dist || r.distrito===dist) &&
+    (!log || r.logistica===log) &&
+    (!mes || String(r.mes)===mes) &&
+    (!term || (r.articulo||'').toLowerCase().includes(term) || (r.marca||'').toLowerCase().includes(term) || (r.nombre||'').toLowerCase().includes(term) || (r.categoria||'').toLowerCase().includes(term))
   );
 
+  renderSidebarStats();
   renderKPIs();
   renderCharts();
   renderDistritoTable();
@@ -482,61 +470,56 @@ function applyFilters(){
   renderSkuTable();
 }
 
-function sumField(rows, field){
-  return rows.reduce((acc,r)=>acc+(Number(r[field])||0), 0);
-}
-function pctVar(v2026, v2025){
-  if(!v2025) return v2026 ? 100 : 0;
-  return ((v2026 - v2025) / Math.abs(v2025)) * 100;
-}
-function fmtMoney(n){
-  return '$ ' + Math.round(n).toLocaleString('es-CO');
-}
-function fmtNum(n){
-  return Math.round(n).toLocaleString('es-CO');
-}
-function fmtPct(n){
-  const s = (n>=0?'+':'') + n.toFixed(1) + '%';
-  return s;
-}
+/* ============================================================
+   HELPERS NUMÉRICOS
+   ============================================================ */
+function sumField(rows, f){ return rows.reduce((a,r)=>a+(Number(r[f])||0),0); }
+function pctVar(a,b){ if(!b) return a?100:0; return ((a-b)/Math.abs(b))*100; }
+function fmtMoney(n){ return '$ ' + Math.round(n).toLocaleString('es-CO'); }
+function fmtNum(n){ return Math.round(n).toLocaleString('es-CO'); }
+function fmtPct(n){ return (n>=0?'+':'') + n.toFixed(1) + '%'; }
 function pctClass(n){ return n>=0 ? 'pct-up' : 'pct-down'; }
 
 /* ============================================================
-   KPIs
+   SIDEBAR STATS + KPIs
    ============================================================ */
+function renderSidebarStats(){
+  document.getElementById('statRegistros').textContent = FILTERED.length.toLocaleString('es-CO');
+  document.getElementById('statSkus').textContent = new Set(FILTERED.map(r=>r.plu)).size.toLocaleString('es-CO');
+  document.getElementById('statCentros').textContent = new Set(FILTERED.map(r=>r.centro)).size.toLocaleString('es-CO');
+
+  document.getElementById('countDistrito').textContent = new Set(FILTERED.map(r=>r.distrito)).size;
+  document.getElementById('countLogistica').textContent = new Set(FILTERED.map(r=>r.logistica)).size;
+  document.getElementById('countCategoria').textContent = new Set(FILTERED.map(r=>r.categoria)).size;
+  document.getElementById('countSku').textContent = new Set(FILTERED.map(r=>r.plu+'|'+r.centro)).size;
+}
+
 function renderKPIs(){
-  const v26 = sumField(FILTERED,'venta2026');
-  const v25 = sumField(FILTERED,'venta2025');
-  const u26 = sumField(FILTERED,'unidades2026');
-  const u25 = sumField(FILTERED,'unidades2025');
+  const v26 = sumField(FILTERED,'venta2026'), v25 = sumField(FILTERED,'venta2025');
+  const u26 = sumField(FILTERED,'unidades2026'), u25 = sumField(FILTERED,'unidades2025');
   const costo26 = sumField(FILTERED,'costo2026');
   const margen26 = v26 - costo26;
-  const varVenta = pctVar(v26, v25);
-  const varUnid = pctVar(u26, u25);
-  const margenPct = v26 ? (margen26 / v26) * 100 : 0;
-  const ticketProm = u26 ? v26 / u26 : 0;
+  const varVenta = pctVar(v26,v25);
+  const margenPct = v26 ? (margen26/v26)*100 : 0;
 
   const kpis = [
-    { label:'Venta 2026', value: fmtMoney(v26), sub: fmtPct(varVenta)+' vs 2025', cls: varVenta>=0?'up':'down' },
-    { label:'Venta 2025', value: fmtMoney(v25), sub: 'Base comparativa', cls:'' },
-    { label:'Unidades 2026', value: fmtNum(u26), sub: fmtPct(varUnid)+' vs 2025', cls: varUnid>=0?'up':'down' },
-    { label:'Unidades 2025', value: fmtNum(u25), sub: 'Base comparativa', cls:'' },
-    { label:'Costo 2026', value: fmtMoney(costo26), sub:'', cls:'', forest:true },
-    { label:'Margen 2026', value: fmtMoney(margen26), sub: margenPct.toFixed(1)+'% de venta', cls: margenPct>=0?'up':'down', forest:true },
-    { label:'Ticket promedio (venta/unid)', value: fmtMoney(ticketProm), sub:'', cls:'', forest:true },
+    { ic:'💰', color:'var(--orange)', bg:'rgba(255,106,61,0.12)', label:'Venta 2026', value: fmtMoney(v26), sub:'acumulado YTD' },
+    { ic:'📈', color: varVenta>=0?'var(--green)':'var(--red)', bg: varVenta>=0?'rgba(31,169,113,0.12)':'rgba(229,84,77,0.12)', label:'Var. Venta vs 2025', value: fmtPct(varVenta), sub: fmtMoney(v25)+' en 2025' },
+    { ic:'📦', color:'var(--blue)', bg:'rgba(47,128,237,0.12)', label:'Unidades 2026', value: fmtNum(u26), sub: fmtPct(pctVar(u26,u25))+' vs 2025' },
+    { ic:'◆', color:'var(--purple)', bg:'rgba(124,92,252,0.12)', label:'Margen 2026', value: fmtMoney(margen26), sub: margenPct.toFixed(1)+'% de venta' },
   ];
 
   document.getElementById('kpiGrid').innerHTML = kpis.map(k=>`
-    <div class="kpi ${k.forest?'forest':''}">
-      <div class="kpi-label">${k.label}</div>
-      <div class="kpi-value">${k.value}</div>
-      ${k.sub ? `<div class="kpi-sub ${k.cls==='up'?'up':k.cls==='down'?'down':''}">${k.sub}</div>` : ''}
+    <div class="kpi">
+      <div class="kpi-top"><div class="kpi-ic" style="background:${k.bg}">${k.ic}</div><div class="kpi-label">${k.label}</div></div>
+      <div class="kpi-value" style="color:${k.color}">${k.value}</div>
+      <div class="kpi-sub">${k.sub}</div>
     </div>
   `).join('');
 }
 
 /* ============================================================
-   CHARTS (Resumen)
+   AGREGACIÓN + CHARTS
    ============================================================ */
 function groupSum(rows, keyFn){
   const map = {};
@@ -551,10 +534,22 @@ function groupSum(rows, keyFn){
   return map;
 }
 function destroyChart(id){ if(charts[id]){ charts[id].destroy(); delete charts[id]; } }
+function chartBaseOptions(showLegend){
+  return {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ display: showLegend, position:'bottom', labels:{ font:{family:'Inter', size:11} } } },
+    scales:{
+      x:{ grid:{ display:false }, ticks:{ font:{family:'Inter', size:10} } },
+      y:{ grid:{ color:'#EEE9DC' }, ticks:{ font:{family:'IBM Plex Mono', size:9} } }
+    }
+  };
+}
 
 function renderCharts(){
   renderMensualCharts();
   renderLogisticaDonut();
+  renderDistritoMini();
+  renderCategoriaRank();
   renderDistritoChart();
   renderLogisticaBarChart();
   renderCategoriaChart();
@@ -569,8 +564,8 @@ function renderMensualCharts(){
   charts.mv = new Chart(document.getElementById('chartMensualVenta'), {
     type:'bar',
     data:{ labels, datasets:[
-      { label:'Venta 2026', data: meses.map(m=>byMes[m].venta2026), backgroundColor:'#EA551D', borderRadius:4 },
-      { label:'Venta 2025', data: meses.map(m=>byMes[m].venta2025), backgroundColor:'#33513E', borderRadius:4 },
+      { label:'2026', data: meses.map(m=>byMes[m].venta2026), backgroundColor:'#FF6A3D', borderRadius:4 },
+      { label:'2025', data: meses.map(m=>byMes[m].venta2025), backgroundColor:'#1B2130', borderRadius:4 },
     ]},
     options: chartBaseOptions(true)
   });
@@ -579,10 +574,10 @@ function renderMensualCharts(){
   charts.mu = new Chart(document.getElementById('chartMensualUnidades'), {
     type:'line',
     data:{ labels, datasets:[
-      { label:'Unidades 2026', data: meses.map(m=>byMes[m].unidades2026), borderColor:'#EA551D', backgroundColor:'#EA551D', tension:.3 },
-      { label:'Unidades 2025', data: meses.map(m=>byMes[m].unidades2025), borderColor:'#33513E', backgroundColor:'#33513E', tension:.3 },
+      { label:'Unidades 2026', data: meses.map(m=>byMes[m].unidades2026), borderColor:'#7C5CFC', backgroundColor:'#7C5CFC', tension:.3 },
+      { label:'Unidades 2025', data: meses.map(m=>byMes[m].unidades2025), borderColor:'#1B2130', backgroundColor:'#1B2130', tension:.3 },
     ]},
-    options: chartBaseOptions(false)
+    options: chartBaseOptions(true)
   });
 }
 
@@ -592,22 +587,45 @@ function renderLogisticaDonut(){
   destroyChart('ld');
   charts.ld = new Chart(document.getElementById('chartLogisticaDonut'), {
     type:'doughnut',
-    data:{ labels, datasets:[{ data: labels.map(l=>byLog[l].venta2026), backgroundColor:['#EA551D','#33513E','#C9A66B','#8C5E3C','#6B6459'] }]},
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ font:{family:'Inter'} } } } }
+    data:{ labels, datasets:[{ data: labels.map(l=>byLog[l].venta2026), backgroundColor:['#FF6A3D','#7C5CFC','#1FA971','#2F80ED','#E5544D'] }]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ font:{family:'Inter', size:11} } } } }
   });
 }
 
-function renderDistritoChart(){
+function renderDistritoMini(){
   const byDist = groupSum(FILTERED, r=>r.distrito || 'Sin dato');
-  const sorted = Object.entries(byDist).sort((a,b)=>b[1].venta2026-a[1].venta2026).slice(0,12);
-  destroyChart('dc');
-  charts.dc = new Chart(document.getElementById('chartDistrito'), {
+  const sorted = Object.entries(byDist).sort((a,b)=>b[1].venta2026-a[1].venta2026).slice(0,6);
+  destroyChart('dm');
+  charts.dm = new Chart(document.getElementById('chartDistritoMini'), {
     type:'bar',
-    data:{ labels: sorted.map(s=>s[0]), datasets:[{ label:'Venta 2026', data: sorted.map(s=>s[1].venta2026), backgroundColor:'#EA551D', borderRadius:4 }]},
+    data:{ labels: sorted.map(s=>s[0]), datasets:[{ data: sorted.map(s=>s[1].venta2026), backgroundColor:'#1FA971', borderRadius:4 }]},
     options:{ ...chartBaseOptions(false), indexAxis:'y' }
   });
 }
 
+function renderCategoriaRank(){
+  const byCat = groupSum(FILTERED, r=>r.categoria || 'Sin dato');
+  const sorted = Object.entries(byCat).sort((a,b)=>b[1].venta2026-a[1].venta2026).slice(0,8);
+  const max = sorted.length ? sorted[0][1].venta2026 : 1;
+  document.getElementById('rankCategoria').innerHTML = sorted.map(([label,v])=>`
+    <div class="rank-row">
+      <div class="rank-label">${label}</div>
+      <div class="rank-bar-bg"><div class="rank-bar-fill" style="width:${max?(v.venta2026/max*100):0}%"></div></div>
+      <div class="rank-value">${fmtMoney(v.venta2026)}</div>
+    </div>
+  `).join('') || '<div class="empty-note">Sin datos</div>';
+}
+
+function renderDistritoChart(){
+  const byDist = groupSum(FILTERED, r=>r.distrito || 'Sin dato');
+  const sorted = Object.entries(byDist).sort((a,b)=>b[1].venta2026-a[1].venta2026).slice(0,15);
+  destroyChart('dc');
+  charts.dc = new Chart(document.getElementById('chartDistrito'), {
+    type:'bar',
+    data:{ labels: sorted.map(s=>s[0]), datasets:[{ label:'Venta 2026', data: sorted.map(s=>s[1].venta2026), backgroundColor:'#FF6A3D', borderRadius:4 }]},
+    options:{ ...chartBaseOptions(false), indexAxis:'y' }
+  });
+}
 function renderLogisticaBarChart(){
   const byLog = groupSum(FILTERED, r=>r.logistica || 'Sin dato');
   const labels = Object.keys(byLog);
@@ -615,33 +633,21 @@ function renderLogisticaBarChart(){
   charts.lb = new Chart(document.getElementById('chartLogisticaBar'), {
     type:'bar',
     data:{ labels, datasets:[
-      { label:'Venta 2026', data: labels.map(l=>byLog[l].venta2026), backgroundColor:'#EA551D', borderRadius:4 },
-      { label:'Venta 2025', data: labels.map(l=>byLog[l].venta2025), backgroundColor:'#33513E', borderRadius:4 },
+      { label:'Venta 2026', data: labels.map(l=>byLog[l].venta2026), backgroundColor:'#FF6A3D', borderRadius:4 },
+      { label:'Venta 2025', data: labels.map(l=>byLog[l].venta2025), backgroundColor:'#1B2130', borderRadius:4 },
     ]},
     options: chartBaseOptions(true)
   });
 }
-
 function renderCategoriaChart(){
   const byCat = groupSum(FILTERED, r=>r.categoria || 'Sin dato');
-  const sorted = Object.entries(byCat).sort((a,b)=>b[1].venta2026-a[1].venta2026).slice(0,10);
+  const sorted = Object.entries(byCat).sort((a,b)=>b[1].venta2026-a[1].venta2026).slice(0,15);
   destroyChart('cc');
   charts.cc = new Chart(document.getElementById('chartCategoria'), {
     type:'bar',
-    data:{ labels: sorted.map(s=>s[0]), datasets:[{ label:'Venta 2026', data: sorted.map(s=>s[1].venta2026), backgroundColor:'#EA551D', borderRadius:4 }]},
+    data:{ labels: sorted.map(s=>s[0]), datasets:[{ label:'Venta 2026', data: sorted.map(s=>s[1].venta2026), backgroundColor:'#7C5CFC', borderRadius:4 }]},
     options:{ ...chartBaseOptions(false), indexAxis:'y' }
   });
-}
-
-function chartBaseOptions(showLegend){
-  return {
-    responsive:true, maintainAspectRatio:false,
-    plugins:{ legend:{ display: showLegend, position:'bottom', labels:{ font:{family:'Inter'} } } },
-    scales:{
-      x:{ grid:{ display:false }, ticks:{ font:{family:'Inter', size:11} } },
-      y:{ grid:{ color:'#E4DACB' }, ticks:{ font:{family:'IBM Plex Mono', size:10} } }
-    }
-  };
 }
 
 /* ============================================================
@@ -657,15 +663,10 @@ function buildGroupRows(rows, keyField, labelFn){
     map[k].unidades2026 += Number(r.unidades2026)||0;
     map[k].unidades2025 += Number(r.unidades2025)||0;
   });
-  return Object.values(map).map(g=>({
-    ...g,
-    varVentaPct: pctVar(g.venta2026, g.venta2025),
-    varUnidPct: pctVar(g.unidades2026, g.unidades2025)
-  })).sort((a,b)=>b.venta2026-a.venta2026);
+  return Object.values(map).map(g=>({...g, varVentaPct: pctVar(g.venta2026,g.venta2025), varUnidPct: pctVar(g.unidades2026,g.unidades2025)})).sort((a,b)=>b.venta2026-a.venta2026);
 }
-
 function rowHtml(g, indent, expandable, groupType){
-  return `<tr class="${expandable?'group-row':'child-row'}" ${expandable?`onclick="toggleGroup('${groupType}','${escapeAttr(g.key)}')"`:''}>
+  return `<tr class="${expandable?'group-row':''}" ${expandable?`onclick="toggleGroup('${groupType}','${escapeAttr(g.key)}')"`:''}>
     <td style="width:24px;">${expandable?`<span class="caret ${openGroups[groupType][g.key]?'open':''}">▶</span>`:''}</td>
     <td style="padding-left:${indent}px">${g.label}</td>
     <td class="num">${fmtMoney(g.venta2026)}</td>
@@ -677,124 +678,83 @@ function rowHtml(g, indent, expandable, groupType){
   </tr>`;
 }
 function escapeAttr(s){ return String(s).replace(/'/g,"\\'"); }
-
 function toggleGroup(type, key){
   openGroups[type][key] = !openGroups[type][key];
   if(type==='distrito') renderDistritoTable();
   if(type==='logistica') renderLogisticaTable();
   if(type==='categoria' || type==='marca') renderCategoriaTable();
 }
-
 function renderDistritoTable(){
   const groups = buildGroupRows(FILTERED, 'distrito');
   let html = '';
   groups.forEach(g=>{
     html += rowHtml(g, 4, true, 'distrito');
     if(openGroups.distrito[g.key]){
-      const children = buildGroupRows(FILTERED.filter(r=>(r.distrito||'Sin dato')===g.key), 'nombre');
-      children.forEach(c=> html += rowHtml(c, 30, false, 'distrito'));
+      buildGroupRows(FILTERED.filter(r=>(r.distrito||'Sin dato')===g.key), 'nombre').forEach(c=> html += rowHtml(c, 30, false, 'distrito'));
     }
   });
   document.querySelector('#tblDistrito tbody').innerHTML = html || '<tr><td colspan="8" class="empty-note">Sin datos con los filtros actuales</td></tr>';
 }
-
 function renderLogisticaTable(){
   const groups = buildGroupRows(FILTERED, 'logistica');
   let html = '';
   groups.forEach(g=>{
     html += rowHtml(g, 4, true, 'logistica');
     if(openGroups.logistica[g.key]){
-      const children = buildGroupRows(FILTERED.filter(r=>(r.logistica||'Sin dato')===g.key), 'categoria');
-      children.forEach(c=> html += rowHtml(c, 30, false, 'logistica'));
+      buildGroupRows(FILTERED.filter(r=>(r.logistica||'Sin dato')===g.key), 'categoria').forEach(c=> html += rowHtml(c, 30, false, 'logistica'));
     }
   });
   document.querySelector('#tblLogistica tbody').innerHTML = html || '<tr><td colspan="8" class="empty-note">Sin datos con los filtros actuales</td></tr>';
 }
-
 function renderCategoriaTable(){
   const groups = buildGroupRows(FILTERED, 'categoria');
   let html = '';
   groups.forEach(cat=>{
     html += rowHtml(cat, 4, true, 'categoria');
     if(openGroups.categoria[cat.key]){
-      const marcaRows = buildGroupRows(FILTERED.filter(r=>(r.categoria||'Sin dato')===cat.key), 'marca');
-      marcaRows.forEach(m=>{
+      buildGroupRows(FILTERED.filter(r=>(r.categoria||'Sin dato')===cat.key), 'marca').forEach(m=>{
         const marcaKey = cat.key + '||' + m.key;
         html += rowHtml({...m, key:marcaKey}, 30, true, 'marca');
         if(openGroups.marca[marcaKey]){
-          const artRows = buildGroupRows(
-            FILTERED.filter(r=>(r.categoria||'Sin dato')===cat.key && (r.marca||'Sin dato')===m.key),
-            'articulo'
-          );
-          artRows.forEach(a=> html += rowHtml(a, 56, false, 'marca'));
+          buildGroupRows(FILTERED.filter(r=>(r.categoria||'Sin dato')===cat.key && (r.marca||'Sin dato')===m.key), 'articulo').forEach(a=> html += rowHtml(a, 56, false, 'marca'));
         }
       });
     }
   });
   document.querySelector('#tblCategoria tbody').innerHTML = html || '<tr><td colspan="8" class="empty-note">Sin datos con los filtros actuales</td></tr>';
 }
-
-/* ============================================================
-   DETALLE SKU (tabla plana con búsqueda)
-   ============================================================ */
 function renderSkuTable(){
-  const term = (document.getElementById('skuSearch').value || '').toLowerCase();
   const grouped = {};
   FILTERED.forEach(r=>{
     const k = [r.plu, r.centro].join('|');
-    if(!grouped[k]){
-      grouped[k] = {
-        articulo:r.articulo, marca:r.marca, categoria:r.categoria,
-        centroLabel: r.nombre || r.centro,
-        venta2026:0, venta2025:0, unidades2026:0, unidades2025:0
-      };
-    }
+    if(!grouped[k]) grouped[k] = { articulo:r.articulo, marca:r.marca, categoria:r.categoria, centroLabel: r.nombre||r.centro, venta2026:0, venta2025:0, unidades2026:0, unidades2025:0 };
     grouped[k].venta2026 += Number(r.venta2026)||0;
     grouped[k].venta2025 += Number(r.venta2025)||0;
     grouped[k].unidades2026 += Number(r.unidades2026)||0;
     grouped[k].unidades2025 += Number(r.unidades2025)||0;
   });
-
   let rows = Object.values(grouped).map(r=>({...r, varVentaPct: pctVar(r.venta2026, r.venta2025)}));
-
-  if(term){
-    rows = rows.filter(r =>
-      (r.articulo||'').toLowerCase().includes(term) ||
-      (r.marca||'').toLowerCase().includes(term) ||
-      (r.centroLabel||'').toLowerCase().includes(term) ||
-      (r.categoria||'').toLowerCase().includes(term)
-    );
-  }
   rows.sort((a,b)=>b.venta2026-a.venta2026);
-  rows = rows.slice(0, 500); // límite razonable en pantalla
-
+  rows = rows.slice(0, 500);
   document.querySelector('#tblSku tbody').innerHTML = rows.map(r=>`
     <tr>
-      <td>${r.articulo}</td>
-      <td>${r.marca}</td>
-      <td>${r.categoria}</td>
-      <td>${r.centroLabel}</td>
-      <td class="num">${fmtMoney(r.venta2026)}</td>
-      <td class="num">${fmtMoney(r.venta2025)}</td>
+      <td>${r.articulo}</td><td>${r.marca}</td><td>${r.categoria}</td><td>${r.centroLabel}</td>
+      <td class="num">${fmtMoney(r.venta2026)}</td><td class="num">${fmtMoney(r.venta2025)}</td>
       <td class="num ${pctClass(r.varVentaPct)}">${fmtPct(r.varVentaPct)}</td>
-      <td class="num">${fmtNum(r.unidades2026)}</td>
-      <td class="num">${fmtNum(r.unidades2025)}</td>
+      <td class="num">${fmtNum(r.unidades2026)}</td><td class="num">${fmtNum(r.unidades2025)}</td>
     </tr>
   `).join('') || '<tr><td colspan="9" class="empty-note">Sin resultados</td></tr>';
 }
 
 /* ============================================================
-   TABS
+   NAVEGACIÓN (sidebar)
    ============================================================ */
-function switchTab(tab){
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
-  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active', p.id==='panel-'+tab));
+function switchPage(page){
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active', b.dataset.page===page));
+  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active', p.id==='page-'+page));
 }
 
-/* ============================================================
-   INIT
-   ============================================================ */
-loadData(false);
+loadData();
 </script>
 </body>
 </html>
